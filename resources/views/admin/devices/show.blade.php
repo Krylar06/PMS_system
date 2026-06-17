@@ -13,10 +13,9 @@
 <div
     x-data="{
         editOpen: false,
-        selectedTypeId: '{{ old('device_type_id', $device->device_type_id) }}',
+        selectedTypeId: @json(old('device_type_id', $device->device_type_id)),
 
-        typeNames: @json(($types ?? collect())->pluck('name', 'id')),
-
+        typeNames: @json($types->pluck('name', 'id')),
         getTypeName(typeId) {
             return (this.typeNames[typeId] || '').toLowerCase();
         },
