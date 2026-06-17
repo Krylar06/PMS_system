@@ -13,6 +13,7 @@ use App\Models\Office;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class DeviceController extends Controller
 {
@@ -268,8 +269,14 @@ class DeviceController extends Controller
     public function generateQr()
     {
         $devices = Device::orderBy('property_number')->get();
+        
+        $qrCodes = $devices->mapWithKeys(function ($device) {
+            return [
+                $device->id => QrCode::size(100)->generate(route('admin.devices.show', $device))
+            ];
+        });
 
-        return view('admin.devices.generate-qr', compact('devices'));
+        return view('admin.devices.generate-qr', compact('devices', 'qrCodes'));
     }
 
     public function exportPreventiveMaintenanceReport()

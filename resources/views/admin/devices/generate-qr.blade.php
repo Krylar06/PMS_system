@@ -29,7 +29,7 @@
             </div>
 
             <div class="mt-2 flex justify-center">
-                {!! QrCode::size(140)->generate($device->property_number) !!}
+                {!! $qrCodes[$device->id] !!}
             </div>
 
             <div class="mt-2 text-sm">
