@@ -89,7 +89,10 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
         Route::get('/reports/preventive-maintenance/export', [DeviceController::class, 'exportPreventiveMaintenanceReport'])
             ->name('admin.reports.preventiveMaintenance.export');
-
+        Route::get(
+            '/devices/generate-qr',
+            [DeviceController::class, 'generateQr']
+        )->name('admin.devices.qr.index');
         Route::resource('/devices', DeviceController::class)->names('admin.devices');
     });
 

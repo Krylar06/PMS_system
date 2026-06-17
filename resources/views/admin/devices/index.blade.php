@@ -78,6 +78,13 @@
 
         <div class="flex flex-wrap gap-2">
             <a
+                href="{{ route('admin.devices.qr.index') }}"
+                class="shrink-0 inline-flex items-center rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700"
+            >
+                Generate QR
+            </a>
+
+            <a
                 href="{{ route('admin.reports.preventiveMaintenance.export') }}"
                 class="shrink-0 inline-flex items-center rounded-xl bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-700"
             >

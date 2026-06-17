@@ -265,6 +265,13 @@ class DeviceController extends Controller
         return view('admin.devices.maintenance-history', compact('device', 'records'));
     }
 
+    public function generateQr()
+    {
+        $devices = Device::orderBy('property_number')->get();
+
+        return view('admin.devices.generate-qr', compact('devices'));
+    }
+
     public function exportPreventiveMaintenanceReport()
     {
         $filename = 'preventive-maintenance-report-' . now()->format('Y-m-d') . '.xlsx';

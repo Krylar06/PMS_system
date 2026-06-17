@@ -261,34 +261,6 @@
         </div>
     </div>
 
-    <div>
-        <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-            <h2 class="font-semibold text-gray-900">
-                QR Code
-            </h2>
-
-            <div class="mt-5 flex justify-center">
-                {!! QrCode::size(260)->generate($deviceUrl) !!}
-            </div>
-
-            <p class="mt-4 break-words text-sm text-gray-700">
-                {{ $deviceUrl }}
-            </p>
-
-            <p class="mt-4 text-sm text-gray-600">
-                Scan this QR code to open this device page directly.
-            </p>
-
-            <button
-                type="button"
-                onclick="window.print()"
-                class="mt-5 rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-black"
-            >
-                Print QR
-            </button>
-        </div>
-    </div>
-
     {{-- EDIT MODAL --}}
     <x-modal show="editOpen" title="Edit Device">
         <form method="POST" action="{{ route('admin.devices.update', $device) }}" class="space-y-4">
