@@ -269,10 +269,12 @@ class DeviceController extends Controller
     public function generateQr()
     {
         $devices = Device::orderBy('property_number')->get();
-        
+
         $qrCodes = $devices->mapWithKeys(function ($device) {
+            $qrPayload = route('admin.devices.show', $device) . '?property_number=' . urlencode($device->property_number);
+
             return [
-                $device->id => QrCode::size(100)->generate(route('admin.devices.show', $device))
+                $device->id => QrCode::size(180)->generate($qrPayload),
             ];
         });
 
