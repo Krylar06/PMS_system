@@ -94,14 +94,10 @@ Route::middleware(['auth', 'admin'])->group(function () {
             ->name('admin.devices.qr.index');
 
         Route::resource('/devices', DeviceController::class)->names('admin.devices');
-    });
 
-    /*
-    |--------------------------------------------------------------------------
-    | Colleges
-    |--------------------------------------------------------------------------
-    */
-    Route::resource('colleges', CollegeController::class)->names('admin.colleges');
+        // ✅ Colleges — now inside admin prefix
+        Route::resource('/colleges', CollegeController::class)->names('admin.colleges');
+    });
 
     /*
     |--------------------------------------------------------------------------
