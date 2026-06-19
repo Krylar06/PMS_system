@@ -9,6 +9,9 @@ use App\Http\Controllers\Admin\OfficeController;
 use App\Http\Controllers\Admin\StaffController;
 use App\Http\Controllers\Admin\StaffDeviceController;
 use App\Http\Controllers\Admin\DeviceController;
+use App\Http\Controllers\Admin\DeviceMaintenanceController;
+use App\Http\Controllers\Admin\DeviceQrController;
+use App\Http\Controllers\Admin\DeviceReportController;
 use App\Http\Controllers\Admin\DashboardController;
 
 /*
@@ -63,40 +66,61 @@ Route::post('/reset-password', [ResetPasswordController::class, 'reset'])
 
 Route::middleware(['auth', 'admin'])->group(function () {
 
-    /*
-    |--------------------------------------------------------------------------
-    | Admin Pages
-    |--------------------------------------------------------------------------
-    */
     Route::prefix('admin')->group(function () {
+
+        /*
+        |--------------------------------------------------------------------------
+        | Dashboard & Static Pages
+        |--------------------------------------------------------------------------
+        */
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
         Route::view('/org-browser', 'admin.org-browser')->name('admin.org-browser');
         Route::view('/scanner', 'admin.scanner')->name('admin.scanner');
 
         /*
         |--------------------------------------------------------------------------
-        | Devices
+        | Device Maintenance
         |--------------------------------------------------------------------------
         */
-        Route::put('/devices/{device}/quick', [DeviceController::class, 'quickUpdate'])
+        Route::put('/devices/{device}/quick', [DeviceMaintenanceController::class, 'quickUpdate'])
             ->name('admin.devices.quickUpdate');
 
-        Route::patch('/devices/{device}/mark-checked', [DeviceController::class, 'markChecked'])
+        Route::patch('/devices/{device}/mark-checked', [DeviceMaintenanceController::class, 'markChecked'])
             ->name('admin.devices.markChecked');
 
-        Route::get('/devices/{device}/maintenance-history', [DeviceController::class, 'maintenanceHistory'])
+        Route::get('/devices/{device}/maintenance-history', [DeviceMaintenanceController::class, 'history'])
             ->name('admin.devices.history');
 
-        Route::get('/reports/preventive-maintenance/export', [DeviceController::class, 'exportPreventiveMaintenanceReport'])
-            ->name('admin.reports.preventiveMaintenance.export');
-
-        Route::get('/devices/generate-qr', [DeviceController::class, 'generateQr'])
+        /*
+        |--------------------------------------------------------------------------
+        | Device QR Codes
+        |--------------------------------------------------------------------------
+        */
+        Route::get('/devices/generate-qr', [DeviceQrController::class, 'index'])
             ->name('admin.devices.qr.index');
 
+        /*
+        |--------------------------------------------------------------------------
+        | Device Reports
+        |--------------------------------------------------------------------------
+        */
+        Route::get('/reports/preventive-maintenance/export', [DeviceReportController::class, 'export'])
+            ->name('admin.reports.preventiveMaintenance.export');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Devices (CRUD) — must come after all specific /devices/* routes
+        |--------------------------------------------------------------------------
+        */
         Route::resource('/devices', DeviceController::class)->names('admin.devices');
 
-        // ✅ Colleges — now inside admin prefix
+        /*
+        |--------------------------------------------------------------------------
+        | Colleges
+        |--------------------------------------------------------------------------
+        */
         Route::resource('/colleges', CollegeController::class)->names('admin.colleges');
+
     });
 
     /*
@@ -121,6 +145,14 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
     /*
     |--------------------------------------------------------------------------
+    | Office Reports
+    |--------------------------------------------------------------------------
+    */
+    Route::get('offices/{office}/reports/preventive-maintenance/export', [DeviceReportController::class, 'exportByOffice'])
+        ->name('admin.offices.preventiveMaintenance.export');
+
+    /*
+    |--------------------------------------------------------------------------
     | Staff
     |--------------------------------------------------------------------------
     */
@@ -141,14 +173,6 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | Office Reports
-    |--------------------------------------------------------------------------
-    */
-    Route::get('offices/{office}/reports/preventive-maintenance/export', [DeviceController::class, 'exportOfficePreventiveMaintenanceReport'])
-        ->name('admin.offices.preventiveMaintenance.export');
-
-    /*
-    |--------------------------------------------------------------------------
     | Staff Devices
     |--------------------------------------------------------------------------
     */
@@ -160,4 +184,5 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
     Route::post('staff/{staff}/devices/{assignment}/return', [StaffDeviceController::class, 'return'])
         ->name('admin.staff.devices.return');
+
 });
