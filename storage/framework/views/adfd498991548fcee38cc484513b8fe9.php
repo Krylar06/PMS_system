@@ -1,5 +1,3 @@
-
-
 <?php $__env->startSection('title', 'Device Manager'); ?>
 <?php $__env->startSection('page_title', 'Device Manager'); ?>
 
@@ -89,7 +87,7 @@
 
             <a
                 href="<?php echo e(route('admin.reports.preventiveMaintenance.export')); ?>"
-                class="shrink-0 inline-flex items-center rounded-xl bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-violet-700"
+                class="shrink-0 inline-flex items-center rounded-xl bg-violet-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-violet-700"
             >
                 Export Excel Report
             </a>
@@ -1008,4 +1006,4 @@
 <?php endif; ?>
 </div>
 <?php $__env->stopSection(); ?>
-<?php echo $__env->make('admin.layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\pms_system\resources\views/admin/devices/index.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('admin.layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH D:\xampp\htdocs\PMS_system\resources\views/admin/devices/index.blade.php ENDPATH**/ ?>

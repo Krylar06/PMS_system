@@ -199,7 +199,8 @@
     <x-modal show="editOpen" title="Edit College">
         <form
             method="POST"
-            :action="`{{ url('/admin/colleges') }}/${editCollege.id}`"
+            action="{{ route('admin.colleges.update', '__ID__') }}"
+            x-bind:action="'{{ route('admin.colleges.update', '__ID__') }}'.replace('__ID__', editCollege.id)"
             class="space-y-3"
         >
             @csrf

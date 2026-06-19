@@ -70,4 +70,4 @@ unset($__defined_vars, $__key, $__value); ?>
             </div>
         </div>
     </div>
-</div><?php /**PATH C:\xampp\htdocs\pms_system\resources\views/components/modal.blade.php ENDPATH**/ ?>
+</div><?php /**PATH D:\xampp\htdocs\PMS_system\resources\views/components/modal.blade.php ENDPATH**/ ?>

@@ -15,11 +15,11 @@ class CreateRequestedUserSeeder extends Seeder
     public function run(): void
     {
         DB::table('users')->updateOrInsert(
-            ['email' => 'qwerty@123'],
+            ['email' => 'juandc@school.local'],
             [
-                'name' => 'qwerty',
-                'email' => 'qwerty@123',
-                'password' => Hash::make('123@qwerty'),
+                'name' => 'Juan',
+                'email' => 'juandc@school.local',
+                'password' => Hash::make('password123'),
                 'email_verified_at' => Carbon::now(),
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),

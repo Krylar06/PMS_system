@@ -17,5 +17,9 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call(DeviceTypeSeeder::class);
+
+        // RandomDevicesSeeder intentionally removed from default seeding (file was empty)
+        // $this->call(RandomDevicesSeeder::class);
+
     }
 }

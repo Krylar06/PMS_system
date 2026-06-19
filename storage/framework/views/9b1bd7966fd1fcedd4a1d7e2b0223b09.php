@@ -234,4 +234,4 @@
 <?php echo \Livewire\Mechanisms\FrontendAssets\FrontendAssets::scripts(); ?>
 
 </body>
-</html><?php /**PATH C:\xampp\htdocs\pms_system\resources\views/admin/layouts/app.blade.php ENDPATH**/ ?>
+</html><?php /**PATH D:\xampp\htdocs\PMS_system\resources\views/admin/layouts/app.blade.php ENDPATH**/ ?>
