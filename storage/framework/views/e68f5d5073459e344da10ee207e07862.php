@@ -1,5 +1,3 @@
-
-
 <?php $__env->startSection('title', 'Device Details'); ?>
 <?php $__env->startSection('page_title', 'Device Details'); ?>
 
@@ -153,10 +151,10 @@
 
                     <div>
                         <div class="text-sm text-gray-500">Operating System</div>
-                        <div class="font-medium text-gray-900">
-                            <?php echo e(data_get($device->specs, 'os', '-') ?: '-'); ?>
+                            <div class="font-medium text-gray-900">
+                                <?php echo e(data_get($device->specs, 'os_version', '-') ?: '-'); ?>
 
-                        </div>
+                            </div>
                     </div>
 
                     <div>
@@ -179,6 +177,14 @@
                         <div class="text-sm text-gray-500">Form Factor</div>
                         <div class="font-medium text-gray-900">
                             <?php echo e(data_get($device->specs, 'form_factor', '-') ?: '-'); ?>
+
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="text-sm text-gray-500">Microsoft Office</div>
+                        <div class="font-medium text-gray-900">
+                            <?php echo e(data_get($device->specs, 'office_version', '-') ?: '-'); ?>
 
                         </div>
                     </div>
@@ -370,8 +376,8 @@
                 <div x-show="isComputerType()" x-cloak>
                     <label class="text-sm font-medium">Operating System</label>
                     <input
-                        name="specs[os]"
-                        value="<?php echo e(old('specs.os', data_get($device->specs, 'os'))); ?>"
+                        name="specs[os_version]"
+                        value="<?php echo e(old('specs.os_version', data_get($device->specs, 'os_version'))); ?>"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                         :disabled="!isComputerType()"
                     >
@@ -382,6 +388,16 @@
                     <input
                         name="specs[memory]"
                         value="<?php echo e(old('specs.memory', data_get($device->specs, 'memory'))); ?>"
+                        class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                        :disabled="!isComputerType()"
+                    >
+                </div>
+
+                <div x-show="isComputerType()" x-cloak>
+                    <label class="text-sm font-medium">Microsoft Office Version</label>
+                    <input
+                        name="specs[office_version]"
+                        value="<?php echo e(old('specs.office_version', data_get($device->specs, 'office_version'))); ?>"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                         :disabled="!isComputerType()"
                     >
@@ -502,4 +518,5 @@
 <?php endif; ?>
 </div>
 <?php $__env->stopSection(); ?>
+
 <?php echo $__env->make('admin.layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\pms_system\resources\views/admin/devices/show.blade.php ENDPATH**/ ?>

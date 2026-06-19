@@ -77,7 +77,7 @@
     <div class="qr-container">
         <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__currentLoopData = $devices; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $device): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
             <div class="qr-card">
-                <div class="qr-prop"><?php echo e(last(explode('-', $device->property_number))); ?></div>
+                <div class="qr-prop"><?php echo e(collect(explode('-', $device->property_number ?? ''))->last()); ?></div>
                 <div><?php echo $qrCodes[$device->id]; ?></div>
                 <div class="qr-type"><?php echo e($device->type?->name); ?></div>
                 <div class="qr-serial">Serial: <?php echo e($device->serial_number ?: 'N/A'); ?></div>
@@ -86,4 +86,5 @@
     </div>
 
 </body>
-</html><?php /**PATH C:\xampp\htdocs\pms_system\resources\views/admin/devices/generate-qr.blade.php ENDPATH**/ ?>
+</html>
+<?php /**PATH C:\xampp\htdocs\pms_system\resources\views/admin/devices/generate-qr.blade.php ENDPATH**/ ?>

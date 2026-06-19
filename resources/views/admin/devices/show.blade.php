@@ -145,9 +145,9 @@
 
                     <div>
                         <div class="text-sm text-gray-500">Operating System</div>
-                        <div class="font-medium text-gray-900">
-                            {{ data_get($device->specs, 'os', '-') ?: '-' }}
-                        </div>
+                            <div class="font-medium text-gray-900">
+                                {{ data_get($device->specs, 'os_version', '-') ?: '-' }}
+                            </div>
                     </div>
 
                     <div>
@@ -168,6 +168,13 @@
                         <div class="text-sm text-gray-500">Form Factor</div>
                         <div class="font-medium text-gray-900">
                             {{ data_get($device->specs, 'form_factor', '-') ?: '-' }}
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="text-sm text-gray-500">Microsoft Office</div>
+                        <div class="font-medium text-gray-900">
+                            {{ data_get($device->specs, 'office_version', '-') ?: '-' }}
                         </div>
                     </div>
                 @endif
@@ -336,8 +343,8 @@
                 <div x-show="isComputerType()" x-cloak>
                     <label class="text-sm font-medium">Operating System</label>
                     <input
-                        name="specs[os]"
-                        value="{{ old('specs.os', data_get($device->specs, 'os')) }}"
+                        name="specs[os_version]"
+                        value="{{ old('specs.os_version', data_get($device->specs, 'os_version')) }}"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                         :disabled="!isComputerType()"
                     >
@@ -348,6 +355,16 @@
                     <input
                         name="specs[memory]"
                         value="{{ old('specs.memory', data_get($device->specs, 'memory')) }}"
+                        class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                        :disabled="!isComputerType()"
+                    >
+                </div>
+
+                <div x-show="isComputerType()" x-cloak>
+                    <label class="text-sm font-medium">Microsoft Office Version</label>
+                    <input
+                        name="specs[office_version]"
+                        value="{{ old('specs.office_version', data_get($device->specs, 'office_version')) }}"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                         :disabled="!isComputerType()"
                     >

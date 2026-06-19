@@ -559,14 +559,14 @@
 
                             <input
                                 type="text"
-                                name="specs[os]"
-                                value="{{ old('specs.os') }}"
+                                name="specs[os_version]"
+                                value="{{ old('specs.os_version') }}"
                                 class="w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                 placeholder="Example: Windows 10"
                                 :disabled="!isComputerType()"
                             >
 
-                            @error('specs.os')
+                            @error('specs.os_version')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>

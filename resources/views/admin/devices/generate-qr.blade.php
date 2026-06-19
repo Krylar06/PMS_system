@@ -77,7 +77,7 @@
     <div class="qr-container">
         @foreach($devices as $device)
             <div class="qr-card">
-{{ optional(collect(explode('-', $device->property_number ?? ''))->last())->toString() }}
+                <div class="qr-prop">{{ collect(explode('-', $device->property_number ?? ''))->last() }}</div>
                 <div>{!! $qrCodes[$device->id] !!}</div>
                 <div class="qr-type">{{ $device->type?->name }}</div>
                 <div class="qr-serial">Serial: {{ $device->serial_number ?: 'N/A' }}</div>

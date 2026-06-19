@@ -15,6 +15,11 @@
 
         addTypeId: '{{ old('device_type_id', $types->first()?->id) }}',
 
+        addOs: '{{ old('specs.os_version', '') }}',
+        addOsLicense: '{{ old('specs.os_license', '') }}',
+        addOffice: '{{ old('specs.office_version', '') }}',
+        addOfficeLicense: '{{ old('specs.office_license', '') }}',
+
         typeNames: @js($types->pluck('name', 'id')),
 
         editDevice: {
@@ -34,9 +39,13 @@
             condition: 'serviceable',
             specs: {
                 os: '',
+                os_version: '',
+                os_license: '',
                 memory: '',
                 storage: '',
-                form_factor: ''
+                form_factor: '',
+                office_version: '',
+                office_license: ''
             }
         },
 
@@ -54,9 +63,13 @@
         openEdit(device) {
             device.specs = device.specs ?? {};
             device.specs.os = device.specs.os ?? '';
+            device.specs.os_version = device.specs.os_version ?? '';
+            device.specs.os_license = device.specs.os_license ?? '';
             device.specs.memory = device.specs.memory ?? '';
             device.specs.storage = device.specs.storage ?? '';
             device.specs.form_factor = device.specs.form_factor ?? '';
+            device.specs.office_version = device.specs.office_version ?? '';
+            device.specs.office_license = device.specs.office_license ?? '';
             device.serial_number = device.serial_number ?? '';
             device.status = device.status ?? 'available';
             device.condition = device.condition ?? 'serviceable';
@@ -238,7 +251,7 @@
                             <div>
                                 <div class="text-gray-500">Operating System</div>
                                 <div class="text-gray-900">
-                                    {{ data_get($d->specs, 'os', '-') ?: '-' }}
+                                    {{ data_get($d->specs, 'os_version', '-') ?: '-' }}
                                 </div>
                             </div>
 
@@ -260,6 +273,13 @@
                                 <div class="text-gray-500">Form Factor</div>
                                 <div class="text-gray-900">
                                     {{ data_get($d->specs, 'form_factor', '-') ?: '-' }}
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="text-gray-500">Microsoft Office</div>
+                                <div class="text-gray-900">
+                                    {{ data_get($d->specs, 'office_version', '-') ?: '-' }}
                                 </div>
                             </div>
                         @endif
@@ -326,9 +346,13 @@
                                 notes: @js($d->notes ?? ''),
                                 specs: {
                                     os: @js(data_get($d->specs, 'os', '')),
+                                    os_version: @js(data_get($d->specs, 'os_version', '')),
+                                    os_license: @js(data_get($d->specs, 'os_license', '')),
                                     memory: @js(data_get($d->specs, 'memory', '')),
                                     storage: @js(data_get($d->specs, 'storage', '')),
-                                    form_factor: @js(data_get($d->specs, 'form_factor', ''))
+                                    form_factor: @js(data_get($d->specs, 'form_factor', '')),
+                                    office_version: @js(data_get($d->specs, 'office_version', '')),
+                                    office_license: @js(data_get($d->specs, 'office_license', ''))
                                 }
                             })"
                         >
@@ -456,11 +480,15 @@
                                             condition: @js($d->condition ?? 'serviceable'),
                                             notes: @js($d->notes ?? ''),
                                             specs: {
-                                                os: @js(data_get($d->specs, 'os', '')),
-                                                memory: @js(data_get($d->specs, 'memory', '')),
-                                                storage: @js(data_get($d->specs, 'storage', '')),
-                                                form_factor: @js(data_get($d->specs, 'form_factor', ''))
-                                            }
+                        os: @js(data_get($d->specs, 'os', '')),
+                        os_version: @js(data_get($d->specs, 'os_version', '')),
+                        os_license: @js(data_get($d->specs, 'os_license', '')),
+                        memory: @js(data_get($d->specs, 'memory', '')),
+                        storage: @js(data_get($d->specs, 'storage', '')),
+                        form_factor: @js(data_get($d->specs, 'form_factor', '')),
+                        office_version: @js(data_get($d->specs, 'office_version', '')),
+                        office_license: @js(data_get($d->specs, 'office_license', ''))
+                    }
                                         })"
                                     >
                                         Edit
@@ -568,13 +596,66 @@
 
                 <div x-show="isComputerType(addTypeId)" x-cloak>
                     <label class="text-sm font-medium">Operating System</label>
-                    <input
-                        name="specs[os]"
-                        value="{{ old('specs.os') }}"
+                    <select
+                        name="specs[os_version]"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
-                        placeholder="Example: Windows 10, Windows 11, Ubuntu"
+                        x-model="addOs"
                         :disabled="!isComputerType(addTypeId)"
                     >
+                        <option value="">-- Select OS --</option>
+                        <option value="Windows 7">Windows 7</option>
+                        <option value="Windows 8">Windows 8</option>
+                        <option value="Windows 10">Windows 10</option>
+                        <option value="Windows 11">Windows 11</option>
+                    </select>
+                </div>
+
+                <div x-show="isComputerType(addTypeId) && addOs !== ''" x-cloak>
+                    <label class="text-sm font-medium">OS License Type</label>
+                    <select
+                        name="specs[os_license]"
+                        class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                        x-model="addOsLicense"
+                        :disabled="!isComputerType(addTypeId) || addOs === ''"
+                    >
+                        <option value="">-- Select License --</option>
+                        <option value="Cracked">Cracked</option>
+                        <option value="OEM Licensed">OEM Licensed</option>
+                        <option value="Retail Licensed">Retail Licensed</option>
+                    </select>
+                </div>
+
+                <div x-show="isComputerType(addTypeId)" x-cloak>
+                    <label class="text-sm font-medium">Microsoft Office Version</label>
+                    <select
+                        name="specs[office_version]"
+                        class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                        x-model="addOffice"
+                        :disabled="!isComputerType(addTypeId)"
+                    >
+                        <option value="">-- Select Office Version --</option>
+                        <option value="Office 2007">Office 2007</option>
+                        <option value="Office 2010">Office 2010</option>
+                        <option value="Office 2013">Office 2013</option>
+                        <option value="Office 2016">Office 2016</option>
+                        <option value="Office 2019">Office 2019</option>
+                        <option value="Office 2021">Office 2021</option>
+                        <option value="Office 365">Office 365</option>
+                    </select>
+                </div>
+
+                <div x-show="isComputerType(addTypeId) && addOffice !== ''" x-cloak>
+                    <label class="text-sm font-medium">Office License Type</label>
+                    <select
+                        name="specs[office_license]"
+                        class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                        x-model="addOfficeLicense"
+                        :disabled="!isComputerType(addTypeId) || addOffice === ''"
+                    >
+                        <option value="">-- Select License --</option>
+                        <option value="Cracked">Cracked</option>
+                        <option value="OEM Licensed">OEM Licensed</option>
+                    </select>
                 </div>
 
                 <div x-show="isComputerType(addTypeId)" x-cloak>
@@ -771,13 +852,66 @@
 
                 <div x-show="isComputerType(editDevice.device_type_id)" x-cloak>
                     <label class="text-sm font-medium">Operating System</label>
-                    <input
-                        name="specs[os]"
+                    <select
+                        name="specs[os_version]"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
-                        x-model="editDevice.specs.os"
-                        placeholder="Example: Windows 10, Windows 11, Ubuntu"
+                        x-model="editDevice.specs.os_version"
                         :disabled="!isComputerType(editDevice.device_type_id)"
                     >
+                        <option value="">-- Select OS --</option>
+                        <option value="Windows 7">Windows 7</option>
+                        <option value="Windows 8">Windows 8</option>
+                        <option value="Windows 10">Windows 10</option>
+                        <option value="Windows 11">Windows 11</option>
+                    </select>
+                </div>
+
+                <div x-show="isComputerType(editDevice.device_type_id) && editDevice.specs.os_version !== ''" x-cloak>
+                    <label class="text-sm font-medium">OS License Type</label>
+                    <select
+                        name="specs[os_license]"
+                        class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                        x-model="editDevice.specs.os_license"
+                        :disabled="!isComputerType(editDevice.device_type_id) || editDevice.specs.os_version === ''"
+                    >
+                        <option value="">-- Select License --</option>
+                        <option value="Cracked">Cracked</option>
+                        <option value="OEM Licensed">OEM Licensed</option>
+                        <option value="Retail Licensed">Retail Licensed</option>
+                    </select>
+                </div>
+
+                <div x-show="isComputerType(editDevice.device_type_id)" x-cloak>
+                    <label class="text-sm font-medium">Microsoft Office Version</label>
+                    <select
+                        name="specs[office_version]"
+                        class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                        x-model="editDevice.specs.office_version"
+                        :disabled="!isComputerType(editDevice.device_type_id)"
+                    >
+                        <option value="">-- Select Office Version --</option>
+                        <option value="Office 2007">Office 2007</option>
+                        <option value="Office 2010">Office 2010</option>
+                        <option value="Office 2013">Office 2013</option>
+                        <option value="Office 2016">Office 2016</option>
+                        <option value="Office 2019">Office 2019</option>
+                        <option value="Office 2021">Office 2021</option>
+                        <option value="Office 365">Office 365</option>
+                    </select>
+                </div>
+
+                <div x-show="isComputerType(editDevice.device_type_id) && editDevice.specs.office_version !== ''" x-cloak>
+                    <label class="text-sm font-medium">Office License Type</label>
+                    <select
+                        name="specs[office_license]"
+                        class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                        x-model="editDevice.specs.office_license"
+                        :disabled="!isComputerType(editDevice.device_type_id) || editDevice.specs.office_version === ''"
+                    >
+                        <option value="">-- Select License --</option>
+                        <option value="Cracked">Cracked</option>
+                        <option value="OEM Licensed">OEM Licensed</option>
+                    </select>
                 </div>
 
                 <div x-show="isComputerType(editDevice.device_type_id)" x-cloak>
