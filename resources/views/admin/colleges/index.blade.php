@@ -4,25 +4,93 @@
 @section('page_title', 'Colleges')
 
 @section('content')
-<div
-    x-data="{
-        addOpen: {{ $errors->any() ? 'true' : 'false' }},
-        editOpen: false,
-        deleteOpen: false,
+@php
+    $addBag = $errors->getBag('add');
+    $editBag = $errors->getBag('edit');
 
-        editCollege: { id: null, name: '', code: '' },
+    $oldNames = old('names', []);
+    $oldCodes = old('codes', []);
+    $bulkSeedCount = $oldNames ? max(1, min(3, count($oldNames))) : 2;
+
+    $bulkRowsSeed = [];
+    for ($i = 0; $i < $bulkSeedCount; $i++) {
+        $bulkRowsSeed[] = [
+            'name' => $oldNames[$i] ?? '',
+            'code' => $oldCodes[$i] ?? '',
+            'nameError' => $addBag->first("names.$i"),
+            'codeError' => $addBag->first("codes.$i"),
+        ];
+    }
+@endphp
+<script>
+document.addEventListener('alpine:init', () => {
+    Alpine.data('collegeManager', () => ({
+        addOpen: {{ $addBag->any() ? 'true' : 'false' }},
+        editOpen: {{ $editBag->any() ? 'true' : 'false' }},
+        deleteOpen: false,
+        bulkEnabled: {{ old('names') !== null ? 'true' : 'false' }},
+
+        addSingle: {
+            name: @js(old('name', '')),
+            code: @js(old('code', '')),
+            nameError: @js($addBag->first('name')),
+            codeError: @js($addBag->first('code'))
+        },
+
+        bulkRows: @json($bulkRowsSeed),
+
+        editCollege: {
+            id: @js(old('editing_id') !== null ? (int) old('editing_id') : null),
+            name: @js(old('name', '')),
+            code: @js(old('code', '')),
+            nameError: @js($editBag->first('name')),
+            codeError: @js($editBag->first('code'))
+        },
         deleteCollegeId: null,
 
+        openAdd() {
+            this.addOpen = true;
+            this.bulkEnabled = false;
+            this.addSingle = { name: '', code: '', nameError: '', codeError: '' };
+            this.bulkRows = [
+                { name: '', code: '', nameError: '', codeError: '' },
+                { name: '', code: '', nameError: '', codeError: '' },
+            ];
+        },
+
+        addBulkRow() {
+            if (this.bulkRows.length < 3) {
+                this.bulkRows.push({ name: '', code: '', nameError: '', codeError: '' });
+            }
+        },
+
+        removeBulkRow() {
+            if (this.bulkRows.length > 1) {
+                this.bulkRows.pop();
+            }
+        },
+
         openEdit(college) {
-            this.editCollege = college;
+            this.editCollege = {
+                id: college.id,
+                name: college.name,
+                code: college.code,
+                nameError: '',
+                codeError: ''
+            };
             this.editOpen = true;
         },
 
         openDelete(id) {
             this.deleteCollegeId = id;
             this.deleteOpen = true;
+            this.$nextTick(() => this.$refs.confirmDeleteBtn && this.$refs.confirmDeleteBtn.focus());
         }
-    }"
+    }));
+});
+</script>
+<div
+    x-data="collegeManager"
     class="space-y-5"
 >
     
@@ -36,7 +104,7 @@
         <button
             type="button"
             class="shrink-0 inline-flex items-center rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700"
-            @click="addOpen = true"
+            @click="openAdd()"
         >
             + Add College
         </button>
@@ -162,29 +230,108 @@
             @csrf
 
             <div>
-                <label class="text-sm font-medium">College Name</label>
-                <input
-                    name="name"
-                    value="{{ old('name') }}"
-                    class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
-                    required
-                >
-                @error('name')
-                    <div class="mt-1 text-sm text-red-600">{{ $message }}</div>
-                @enderror
+                <div class="flex items-center justify-between gap-3">
+                    <label class="text-sm font-medium">Bulk Add</label>
+                    <button
+                        type="button"
+                        class="rounded-lg px-3 py-1.5 text-sm font-medium border"
+                    x-bind:class="bulkEnabled ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'"
+                        @click="bulkEnabled = !bulkEnabled"
+                    >
+                        <span x-text="bulkEnabled ? 'ON' : 'OFF'">OFF</span>
+                    </button>
+
+
+                </div>
             </div>
 
-            <div>
-                <label class="text-sm font-medium">Code (optional)</label>
-                <input
-                    name="code"
-                    value="{{ old('code') }}"
-                    class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
-                >
-                @error('code')
-                    <div class="mt-1 text-sm text-red-600">{{ $message }}</div>
-                @enderror
+            <div class="space-y-3">
+                <!-- Bulk controls -->
+                <div x-show="bulkEnabled" class="flex items-center gap-2">
+                    <button
+                        type="button"
+                        class="rounded-lg bg-gray-100 px-3 py-1.5 text-gray-700 hover:bg-gray-200"
+                        @click="removeBulkRow()"
+                    >-
+                    </button>
+
+                    <input type="hidden" name="count" :value="bulkRows.length">
+
+                    <div class="text-sm text-gray-700">
+                        Records: <span class="font-semibold" x-text="bulkRows.length"></span>
+                    </div>
+
+                    <button
+                        type="button"
+                        class="rounded-lg bg-gray-100 px-3 py-1.5 text-gray-700 hover:bg-gray-200"
+                        @click="addBulkRow()"
+                    >+
+                    </button>
+                </div>
+
+                <!-- Bulk form -->
+                <template x-if="bulkEnabled">
+                    <div class="space-y-4">
+                        <template x-for="(row, idx) in bulkRows" :key="idx">
+                            <div class="space-y-2 rounded-lg border border-gray-200 p-3 bg-gray-50">
+                                <div class="text-xs font-semibold text-gray-600" x-text="`College ${idx + 1}`"></div>
+
+                                <div>
+                                    <label class="text-sm font-medium">College Name</label>
+                                    <input
+                                        :name="`names[${idx}]`"
+                                        x-model="row.name"
+                                        class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                                        required
+                                        :placeholder="`e.g. College ${idx + 1}`"
+                                    >
+                                    <div class="mt-1 text-sm text-red-600" x-show="row.nameError" x-text="row.nameError"></div>
+                                </div>
+
+                                <div>
+                                    <label class="text-sm font-medium">Code (optional)</label>
+                                    <input
+                                        :name="`codes[${idx}]`"
+                                        x-model="row.code"
+                                        class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                                        placeholder="Optional (unique)"
+                                    >
+                                    <div class="mt-1 text-sm text-red-600" x-show="row.codeError" x-text="row.codeError"></div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+
+                <!-- Single form -->
+                <template x-if="!bulkEnabled">
+                    <div class="space-y-3">
+                        <div>
+                            <label class="text-sm font-medium">College Name</label>
+                            <input
+                                name="name"
+                                x-model="addSingle.name"
+                                class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                                required
+                                placeholder="Enter college name"
+                            >
+                            <div class="mt-1 text-sm text-red-600" x-show="addSingle.nameError" x-text="addSingle.nameError"></div>
+                        </div>
+
+                        <div>
+                            <label class="text-sm font-medium">Code (optional)</label>
+                            <input
+                                name="code"
+                                x-model="addSingle.code"
+                                class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                                placeholder="Optional (unique)"
+                            >
+                            <div class="mt-1 text-sm text-red-600" x-show="addSingle.codeError" x-text="addSingle.codeError"></div>
+                        </div>
+                    </div>
+                </template>
             </div>
+
 
             <div class="flex gap-2 pt-2">
                 <button class="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">Save</button>
@@ -192,11 +339,14 @@
                     Cancel
                 </button>
             </div>
+
+            
         </form>
     </x-modal>
 
+
     {{-- Edit modal --}}
-    <x-modal show="editOpen" title="Edit College">
+    <x-modal show="editOpen" title="Edit College" >
         <form
             method="POST"
             action="{{ route('admin.colleges.update', '__ID__') }}"
@@ -206,6 +356,8 @@
             @csrf
             @method('PUT')
 
+            <input type="hidden" name="editing_id" :value="editCollege.id">
+
             <div>
                 <label class="text-sm font-medium">College Name</label>
                 <input
@@ -214,6 +366,7 @@
                     x-model="editCollege.name"
                     required
                 >
+                <div class="mt-1 text-sm text-red-600" x-show="editCollege.nameError" x-text="editCollege.nameError"></div>
             </div>
 
             <div>
@@ -223,6 +376,7 @@
                     class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                     x-model="editCollege.code"
                 >
+                <div class="mt-1 text-sm text-red-600" x-show="editCollege.codeError" x-text="editCollege.codeError"></div>
             </div>
 
             <div class="flex gap-2 pt-2">
@@ -241,15 +395,20 @@
                 Are you sure you want to delete this college?
             </div>
 
+
+
             <form
                 method="POST"
-                :action="`{{ url('/admin/colleges') }}/${deleteCollegeId}`"
+                :action="`{{ route('admin.colleges.destroy', ['college' => '__ID__']) }}`.replace('__ID__', deleteCollegeId)"
+                @submit="if (!deleteCollegeId) $event.preventDefault()"
                 class="flex gap-2"
             >
+
                 @csrf
                 @method('DELETE')
 
-                <button class="rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700">Yes, Delete</button>
+                <button type="submit" x-ref="confirmDeleteBtn" class="rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700">Confirm</button>
+
                 <button type="button" class="rounded-lg bg-gray-100 px-4 py-2 text-gray-700 hover:bg-gray-200" @click="deleteOpen = false">
                     Cancel
                 </button>

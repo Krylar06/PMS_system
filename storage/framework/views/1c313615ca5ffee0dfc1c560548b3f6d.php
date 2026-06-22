@@ -2,25 +2,93 @@
 <?php $__env->startSection('page_title', 'Colleges'); ?>
 
 <?php $__env->startSection('content'); ?>
-<div
-    x-data="{
-        addOpen: <?php echo e($errors->any() ? 'true' : 'false'); ?>,
-        editOpen: false,
-        deleteOpen: false,
+<?php
+    $addBag = $errors->getBag('add');
+    $editBag = $errors->getBag('edit');
 
-        editCollege: { id: null, name: '', code: '' },
+    $oldNames = old('names', []);
+    $oldCodes = old('codes', []);
+    $bulkSeedCount = $oldNames ? max(1, min(3, count($oldNames))) : 2;
+
+    $bulkRowsSeed = [];
+    for ($i = 0; $i < $bulkSeedCount; $i++) {
+        $bulkRowsSeed[] = [
+            'name' => $oldNames[$i] ?? '',
+            'code' => $oldCodes[$i] ?? '',
+            'nameError' => $addBag->first("names.$i"),
+            'codeError' => $addBag->first("codes.$i"),
+        ];
+    }
+?>
+<script>
+document.addEventListener('alpine:init', () => {
+    Alpine.data('collegeManager', () => ({
+        addOpen: <?php echo e($addBag->any() ? 'true' : 'false'); ?>,
+        editOpen: <?php echo e($editBag->any() ? 'true' : 'false'); ?>,
+        deleteOpen: false,
+        bulkEnabled: <?php echo e(old('names') !== null ? 'true' : 'false'); ?>,
+
+        addSingle: {
+            name: <?php echo \Illuminate\Support\Js::from(old('name', ''))->toHtml() ?>,
+            code: <?php echo \Illuminate\Support\Js::from(old('code', ''))->toHtml() ?>,
+            nameError: <?php echo \Illuminate\Support\Js::from($addBag->first('name'))->toHtml() ?>,
+            codeError: <?php echo \Illuminate\Support\Js::from($addBag->first('code'))->toHtml() ?>
+        },
+
+        bulkRows: <?php echo json_encode($bulkRowsSeed, 15, 512) ?>,
+
+        editCollege: {
+            id: <?php echo \Illuminate\Support\Js::from(old('editing_id') !== null ? (int) old('editing_id') : null)->toHtml() ?>,
+            name: <?php echo \Illuminate\Support\Js::from(old('name', ''))->toHtml() ?>,
+            code: <?php echo \Illuminate\Support\Js::from(old('code', ''))->toHtml() ?>,
+            nameError: <?php echo \Illuminate\Support\Js::from($editBag->first('name'))->toHtml() ?>,
+            codeError: <?php echo \Illuminate\Support\Js::from($editBag->first('code'))->toHtml() ?>
+        },
         deleteCollegeId: null,
 
+        openAdd() {
+            this.addOpen = true;
+            this.bulkEnabled = false;
+            this.addSingle = { name: '', code: '', nameError: '', codeError: '' };
+            this.bulkRows = [
+                { name: '', code: '', nameError: '', codeError: '' },
+                { name: '', code: '', nameError: '', codeError: '' },
+            ];
+        },
+
+        addBulkRow() {
+            if (this.bulkRows.length < 3) {
+                this.bulkRows.push({ name: '', code: '', nameError: '', codeError: '' });
+            }
+        },
+
+        removeBulkRow() {
+            if (this.bulkRows.length > 1) {
+                this.bulkRows.pop();
+            }
+        },
+
         openEdit(college) {
-            this.editCollege = college;
+            this.editCollege = {
+                id: college.id,
+                name: college.name,
+                code: college.code,
+                nameError: '',
+                codeError: ''
+            };
             this.editOpen = true;
         },
 
         openDelete(id) {
             this.deleteCollegeId = id;
             this.deleteOpen = true;
+            this.$nextTick(() => this.$refs.confirmDeleteBtn && this.$refs.confirmDeleteBtn.focus());
         }
-    }"
+    }));
+});
+</script>
+<div
+    x-data="collegeManager"
     class="space-y-5"
 >
     
@@ -34,7 +102,7 @@
         <button
             type="button"
             class="shrink-0 inline-flex items-center rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700"
-            @click="addOpen = true"
+            @click="openAdd()"
         >
             + Add College
         </button>
@@ -174,43 +242,108 @@
             <?php echo csrf_field(); ?>
 
             <div>
-                <label class="text-sm font-medium">College Name</label>
-                <input
-                    name="name"
-                    value="<?php echo e(old('name')); ?>"
-                    class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
-                    required
-                >
-                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__errorArgs = ['name'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-                    <div class="mt-1 text-sm text-red-600"><?php echo e($message); ?></div>
-                <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                <div class="flex items-center justify-between gap-3">
+                    <label class="text-sm font-medium">Bulk Add</label>
+                    <button
+                        type="button"
+                        class="rounded-lg px-3 py-1.5 text-sm font-medium border"
+                    x-bind:class="bulkEnabled ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'"
+                        @click="bulkEnabled = !bulkEnabled"
+                    >
+                        <span x-text="bulkEnabled ? 'ON' : 'OFF'">OFF</span>
+                    </button>
+
+
+                </div>
             </div>
 
-            <div>
-                <label class="text-sm font-medium">Code (optional)</label>
-                <input
-                    name="code"
-                    value="<?php echo e(old('code')); ?>"
-                    class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
-                >
-                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__errorArgs = ['code'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-                    <div class="mt-1 text-sm text-red-600"><?php echo e($message); ?></div>
-                <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+            <div class="space-y-3">
+                <!-- Bulk controls -->
+                <div x-show="bulkEnabled" class="flex items-center gap-2">
+                    <button
+                        type="button"
+                        class="rounded-lg bg-gray-100 px-3 py-1.5 text-gray-700 hover:bg-gray-200"
+                        @click="removeBulkRow()"
+                    >-
+                    </button>
+
+                    <input type="hidden" name="count" :value="bulkRows.length">
+
+                    <div class="text-sm text-gray-700">
+                        Records: <span class="font-semibold" x-text="bulkRows.length"></span>
+                    </div>
+
+                    <button
+                        type="button"
+                        class="rounded-lg bg-gray-100 px-3 py-1.5 text-gray-700 hover:bg-gray-200"
+                        @click="addBulkRow()"
+                    >+
+                    </button>
+                </div>
+
+                <!-- Bulk form -->
+                <template x-if="bulkEnabled">
+                    <div class="space-y-4">
+                        <template x-for="(row, idx) in bulkRows" :key="idx">
+                            <div class="space-y-2 rounded-lg border border-gray-200 p-3 bg-gray-50">
+                                <div class="text-xs font-semibold text-gray-600" x-text="`College ${idx + 1}`"></div>
+
+                                <div>
+                                    <label class="text-sm font-medium">College Name</label>
+                                    <input
+                                        :name="`names[${idx}]`"
+                                        x-model="row.name"
+                                        class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                                        required
+                                        :placeholder="`e.g. College ${idx + 1}`"
+                                    >
+                                    <div class="mt-1 text-sm text-red-600" x-show="row.nameError" x-text="row.nameError"></div>
+                                </div>
+
+                                <div>
+                                    <label class="text-sm font-medium">Code (optional)</label>
+                                    <input
+                                        :name="`codes[${idx}]`"
+                                        x-model="row.code"
+                                        class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                                        placeholder="Optional (unique)"
+                                    >
+                                    <div class="mt-1 text-sm text-red-600" x-show="row.codeError" x-text="row.codeError"></div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+
+                <!-- Single form -->
+                <template x-if="!bulkEnabled">
+                    <div class="space-y-3">
+                        <div>
+                            <label class="text-sm font-medium">College Name</label>
+                            <input
+                                name="name"
+                                x-model="addSingle.name"
+                                class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                                required
+                                placeholder="Enter college name"
+                            >
+                            <div class="mt-1 text-sm text-red-600" x-show="addSingle.nameError" x-text="addSingle.nameError"></div>
+                        </div>
+
+                        <div>
+                            <label class="text-sm font-medium">Code (optional)</label>
+                            <input
+                                name="code"
+                                x-model="addSingle.code"
+                                class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                                placeholder="Optional (unique)"
+                            >
+                            <div class="mt-1 text-sm text-red-600" x-show="addSingle.codeError" x-text="addSingle.codeError"></div>
+                        </div>
+                    </div>
+                </template>
             </div>
+
 
             <div class="flex gap-2 pt-2">
                 <button class="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">Save</button>
@@ -218,6 +351,8 @@ unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendB
                     Cancel
                 </button>
             </div>
+
+            
         </form>
      <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
@@ -229,6 +364,7 @@ unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendB
 <?php $component = $__componentOriginal9f64f32e90b9102968f2bc548315018c; ?>
 <?php unset($__componentOriginal9f64f32e90b9102968f2bc548315018c); ?>
 <?php endif; ?>
+
 
     
     <?php if (isset($component)) { $__componentOriginal9f64f32e90b9102968f2bc548315018c = $component; } ?>
@@ -252,6 +388,8 @@ unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendB
             <?php echo csrf_field(); ?>
             <?php echo method_field('PUT'); ?>
 
+            <input type="hidden" name="editing_id" :value="editCollege.id">
+
             <div>
                 <label class="text-sm font-medium">College Name</label>
                 <input
@@ -260,6 +398,7 @@ unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendB
                     x-model="editCollege.name"
                     required
                 >
+                <div class="mt-1 text-sm text-red-600" x-show="editCollege.nameError" x-text="editCollege.nameError"></div>
             </div>
 
             <div>
@@ -269,6 +408,7 @@ unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendB
                     class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                     x-model="editCollege.code"
                 >
+                <div class="mt-1 text-sm text-red-600" x-show="editCollege.codeError" x-text="editCollege.codeError"></div>
             </div>
 
             <div class="flex gap-2 pt-2">
@@ -307,15 +447,20 @@ unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendB
                 Are you sure you want to delete this college?
             </div>
 
+
+
             <form
                 method="POST"
-                :action="`<?php echo e(url('/admin/colleges')); ?>/${deleteCollegeId}`"
+                :action="`<?php echo e(route('admin.colleges.destroy', ['college' => '__ID__'])); ?>`.replace('__ID__', deleteCollegeId)"
+                @submit="if (!deleteCollegeId) $event.preventDefault()"
                 class="flex gap-2"
             >
+
                 <?php echo csrf_field(); ?>
                 <?php echo method_field('DELETE'); ?>
 
-                <button class="rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700">Yes, Delete</button>
+                <button type="submit" x-ref="confirmDeleteBtn" class="rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700">Confirm</button>
+
                 <button type="button" class="rounded-lg bg-gray-100 px-4 py-2 text-gray-700 hover:bg-gray-200" @click="deleteOpen = false">
                     Cancel
                 </button>
