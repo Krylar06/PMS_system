@@ -1,22 +1,20 @@
-@extends('admin.layouts.app')
+<?php $__env->startSection('title', 'Dashboard'); ?>
+<?php $__env->startSection('page_title', 'Dashboard'); ?>
 
-@section('title', 'Dashboard')
-@section('page_title', 'Dashboard')
-
-@section('content')
+<?php $__env->startSection('content'); ?>
 <div
     x-data="{
-        addDeviceOpen: {{ $errors->any() ? 'true' : 'false' }},
-        selectedDeviceTypeId: '{{ old('device_type_id', $types->first()?->id) }}',
+        addDeviceOpen: <?php echo e($errors->any() ? 'true' : 'false'); ?>,
+        selectedDeviceTypeId: '<?php echo e(old('device_type_id', $types->first()?->id)); ?>',
 
-        deviceTypes: @js(
+        deviceTypes: <?php echo \Illuminate\Support\Js::from(
             $types->map(function ($type) {
                 return [
                     'id' => (string) $type->id,
                     'name' => $type->name,
                 ];
             })->values()
-        ),
+        )->toHtml() ?>,
 
         selectedDeviceTypeName() {
             let selected = this.deviceTypes.find(type => type.id === String(this.selectedDeviceTypeId));
@@ -29,7 +27,7 @@
     }"
     class="space-y-6"
 >
-    {{-- Page Header --}}
+    
     <div class="flex flex-col gap-1">
         <h1 class="text-2xl font-semibold text-gray-900">
             Dashboard
@@ -40,34 +38,36 @@
         </p>
     </div>
 
-    {{-- Alerts --}}
-    @if(session('success'))
+    
+    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(session('success')): ?>
         <div class="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
-            {{ session('success') }}
-        </div>
-    @endif
+            <?php echo e(session('success')); ?>
 
-    @if(session('error'))
+        </div>
+    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+
+    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(session('error')): ?>
         <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-            {{ session('error') }}
-        </div>
-    @endif
+            <?php echo e(session('error')); ?>
 
-    @if($errors->any())
+        </div>
+    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+
+    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($errors->any()): ?>
         <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             <div class="font-semibold">Please check the form.</div>
             <ul class="mt-1 list-inside list-disc">
-                @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
+                    <li><?php echo e($error); ?></li>
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
             </ul>
         </div>
-    @endif
+    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
-    {{-- Summary Cards --}}
+    
     <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
         <a
-            href="{{ route('admin.devices.index') }}"
+            href="<?php echo e(route('admin.devices.index')); ?>"
             class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
         >
             <div class="flex items-start justify-between">
@@ -77,7 +77,8 @@
                     </p>
 
                     <div class="mt-3 text-3xl font-semibold text-gray-900">
-                        {{ number_format($totalDevices ?? 0) }}
+                        <?php echo e(number_format($totalDevices ?? 0)); ?>
+
                     </div>
                 </div>
 
@@ -94,7 +95,7 @@
         </a>
 
         <a
-            href="{{ route('admin.devices.index') }}"
+            href="<?php echo e(route('admin.devices.index')); ?>"
             class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
         >
             <div class="flex items-start justify-between">
@@ -104,7 +105,8 @@
                     </p>
 
                     <div class="mt-3 text-3xl font-semibold text-gray-900">
-                        {{ number_format($availableDevices ?? 0) }}
+                        <?php echo e(number_format($availableDevices ?? 0)); ?>
+
                     </div>
                 </div>
 
@@ -121,7 +123,7 @@
         </a>
 
         <a
-            href="{{ route('admin.devices.index') }}"
+            href="<?php echo e(route('admin.devices.index')); ?>"
             class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
         >
             <div class="flex items-start justify-between">
@@ -131,7 +133,8 @@
                     </p>
 
                     <div class="mt-3 text-3xl font-semibold text-gray-900">
-                        {{ number_format($issuedDevices ?? 0) }}
+                        <?php echo e(number_format($issuedDevices ?? 0)); ?>
+
                     </div>
                 </div>
 
@@ -148,7 +151,7 @@
         </a>
 
         <a
-            href="{{ route('admin.devices.index', ['condition' => 'serviceable']) }}"
+            href="<?php echo e(route('admin.devices.index', ['condition' => 'serviceable'])); ?>"
             class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-green-200 hover:shadow-md"
         >
             <div class="flex items-start justify-between">
@@ -158,7 +161,8 @@
                     </p>
 
                     <div class="mt-3 text-3xl font-semibold text-gray-900">
-                        {{ number_format($serviceableDevices ?? 0) }}
+                        <?php echo e(number_format($serviceableDevices ?? 0)); ?>
+
                     </div>
                 </div>
 
@@ -175,7 +179,7 @@
         </a>
 
         <a
-            href="{{ route('admin.devices.index', ['condition' => 'unserviceable']) }}"
+            href="<?php echo e(route('admin.devices.index', ['condition' => 'unserviceable'])); ?>"
             class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-red-200 hover:shadow-md"
         >
             <div class="flex items-start justify-between">
@@ -185,7 +189,8 @@
                     </p>
 
                     <div class="mt-3 text-3xl font-semibold text-gray-900">
-                        {{ number_format($unserviceableDevices ?? 0) }}
+                        <?php echo e(number_format($unserviceableDevices ?? 0)); ?>
+
                     </div>
                 </div>
 
@@ -202,7 +207,7 @@
         </a>
     </div>
 
-    {{-- Quick Actions --}}
+    
     <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
         <div class="mb-4">
             <h2 class="text-base font-semibold text-gray-900">
@@ -225,7 +230,7 @@
             </button>
 
             <a
-                href="{{ route('admin.devices.index') }}"
+                href="<?php echo e(route('admin.devices.index')); ?>"
                 class="flex items-center justify-between rounded-xl border border-gray-200 px-4 py-3 text-sm font-medium text-gray-700 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
             >
                 <span>View Devices</span>
@@ -233,7 +238,7 @@
             </a>
 
             <a
-                href="{{ route('admin.scanner') }}"
+                href="<?php echo e(route('admin.scanner')); ?>"
                 class="flex items-center justify-between rounded-xl border border-gray-200 px-4 py-3 text-sm font-medium text-gray-700 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
             >
                 <span>Scan QR Code</span>
@@ -241,7 +246,7 @@
             </a>
 
             <a
-                href="{{ route('admin.reports.preventiveMaintenance.export') }}"
+                href="<?php echo e(route('admin.reports.preventiveMaintenance.export')); ?>"
                 class="flex items-center justify-between rounded-xl border border-gray-200 px-4 py-3 text-sm font-medium text-gray-700 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
             >
                 <span>Export Report</span>
@@ -250,24 +255,24 @@
         </div>
     </div>
 
-    {{-- Charts --}}
+    
     <div class="grid grid-cols-1 gap-6 xl:grid-cols-3">
 
-        {{-- Bar Chart: Devices by Status --}}
+        
         <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
             <h2 class="text-base font-semibold text-gray-900">Devices by Status</h2>
             <p class="mt-1 mb-4 text-sm text-gray-500">Current status breakdown.</p>
             <canvas id="statusChart"></canvas>
         </div>
 
-        {{-- Doughnut Chart: Devices by Type --}}
+        
         <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
             <h2 class="text-base font-semibold text-gray-900">Devices by Type</h2>
             <p class="mt-1 mb-4 text-sm text-gray-500">Distribution across device categories.</p>
             <canvas id="typeChart"></canvas>
         </div>
 
-        {{-- Bar Chart: Devices by Office --}}
+        
         <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
             <h2 class="text-base font-semibold text-gray-900">Devices by Office</h2>
             <p class="mt-1 mb-4 text-sm text-gray-500">Issued devices per office.</p>
@@ -276,9 +281,9 @@
 
     </div>
 
-    {{-- Recent Tables --}}
+    
     <div class="grid grid-cols-1 gap-6 xl:grid-cols-2">
-        {{-- Recent Issued Devices --}}
+        
         <div class="rounded-2xl border border-gray-200 bg-white shadow-sm">
             <div class="flex items-center justify-between border-b border-gray-200 px-5 py-4">
                 <div>
@@ -303,60 +308,66 @@
                     </thead>
 
                     <tbody class="divide-y divide-gray-200">
-                        @forelse($recentIssuedDevices as $assignment)
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__empty_1 = true; $__currentLoopData = $recentIssuedDevices; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $assignment): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
                             <tr class="hover:bg-gray-50">
                                 <td class="px-5 py-4">
-                                    @if($assignment->device)
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($assignment->device): ?>
                                         <a
-                                            href="{{ route('admin.devices.show', $assignment->device) }}"
+                                            href="<?php echo e(route('admin.devices.show', $assignment->device)); ?>"
                                             class="font-medium text-blue-600 hover:underline"
                                         >
-                                            {{ $assignment->device->property_number }}
+                                            <?php echo e($assignment->device->property_number); ?>
+
                                         </a>
 
                                         <div class="mt-1 text-xs text-gray-500">
-                                            {{ $assignment->device->type?->name ?? 'Device' }}
+                                            <?php echo e($assignment->device->type?->name ?? 'Device'); ?>
 
-                                            @if($assignment->device->serial_number)
-                                                • SN: {{ $assignment->device->serial_number }}
-                                            @endif
+
+                                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($assignment->device->serial_number): ?>
+                                                • SN: <?php echo e($assignment->device->serial_number); ?>
+
+                                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                         </div>
-                                    @else
+                                    <?php else: ?>
                                         <span class="text-gray-400">Device deleted</span>
-                                    @endif
+                                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                 </td>
 
                                 <td class="px-5 py-4 text-gray-700">
-                                    @if($assignment->staff)
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($assignment->staff): ?>
                                         <div class="font-medium text-gray-900">
-                                            {{ $assignment->staff->last_name }}, {{ $assignment->staff->first_name }}
+                                            <?php echo e($assignment->staff->last_name); ?>, <?php echo e($assignment->staff->first_name); ?>
+
                                         </div>
 
                                         <div class="mt-1 text-xs text-gray-500">
-                                            {{ $assignment->staff->office?->name ?? 'No office' }}
+                                            <?php echo e($assignment->staff->office?->name ?? 'No office'); ?>
+
                                         </div>
-                                    @else
+                                    <?php else: ?>
                                         <span class="text-gray-400">Staff deleted</span>
-                                    @endif
+                                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                 </td>
 
                                 <td class="px-5 py-4 text-gray-700">
-                                    {{ $assignment->issued_at ? $assignment->issued_at->format('M d, Y') : '-' }}
+                                    <?php echo e($assignment->issued_at ? $assignment->issued_at->format('M d, Y') : '-'); ?>
+
                                 </td>
                             </tr>
-                        @empty
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
                             <tr>
                                 <td colspan="3" class="px-5 py-8 text-center text-gray-500">
                                     No issued devices yet.
                                 </td>
                             </tr>
-                        @endforelse
+                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     </tbody>
                 </table>
             </div>
         </div>
 
-        {{-- Recent Maintenance Records --}}
+        
         <div class="rounded-2xl border border-gray-200 bg-white shadow-sm">
             <div class="flex items-center justify-between border-b border-gray-200 px-5 py-4">
                 <div>
@@ -381,53 +392,58 @@
                     </thead>
 
                     <tbody class="divide-y divide-gray-200">
-                        @forelse($recentMaintenanceRecords as $record)
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__empty_1 = true; $__currentLoopData = $recentMaintenanceRecords; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $record): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
                             <tr class="hover:bg-gray-50">
                                 <td class="px-5 py-4">
-                                    @if($record->device)
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($record->device): ?>
                                         <a
-                                            href="{{ route('admin.devices.show', $record->device) }}"
+                                            href="<?php echo e(route('admin.devices.show', $record->device)); ?>"
                                             class="font-medium text-blue-600 hover:underline"
                                         >
-                                            {{ $record->device->property_number }}
+                                            <?php echo e($record->device->property_number); ?>
+
                                         </a>
 
                                         <div class="mt-1 text-xs text-gray-500">
-                                            {{ $record->device->type?->name ?? 'Device' }}
+                                            <?php echo e($record->device->type?->name ?? 'Device'); ?>
 
-                                            @if($record->device->serial_number)
-                                                • SN: {{ $record->device->serial_number }}
-                                            @endif
+
+                                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($record->device->serial_number): ?>
+                                                • SN: <?php echo e($record->device->serial_number); ?>
+
+                                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                         </div>
-                                    @else
+                                    <?php else: ?>
                                         <span class="text-gray-400">Device deleted</span>
-                                    @endif
+                                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                 </td>
 
                                 <td class="px-5 py-4 text-gray-700">
-                                    {{ $record->maintenance_date ? $record->maintenance_date->format('M d, Y') : '-' }}
+                                    <?php echo e($record->maintenance_date ? $record->maintenance_date->format('M d, Y') : '-'); ?>
+
                                 </td>
 
                                 <td class="px-5 py-4 text-gray-700">
                                     <div class="max-w-xs truncate">
-                                        {{ $record->remarks ?: '-' }}
+                                        <?php echo e($record->remarks ?: '-'); ?>
+
                                     </div>
                                 </td>
                             </tr>
-                        @empty
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
                             <tr>
                                 <td colspan="3" class="px-5 py-8 text-center text-gray-500">
                                     No maintenance records yet.
                                 </td>
                             </tr>
-                        @endforelse
+                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
 
-    {{-- Add Device Modal --}}
+    
     <div
         x-show="addDeviceOpen"
         x-cloak
@@ -457,8 +473,8 @@
                 </button>
             </div>
 
-            <form method="POST" action="{{ route('admin.devices.store') }}">
-                @csrf
+            <form method="POST" action="<?php echo e(route('admin.devices.store')); ?>">
+                <?php echo csrf_field(); ?>
 
                 <input type="hidden" name="status" value="available">
 
@@ -475,16 +491,24 @@
                                 class="w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                 required
                             >
-                                @foreach($types as $type)
-                                    <option value="{{ $type->id }}">
-                                        {{ $type->name }}
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::openLoop(); ?><?php endif; ?><?php $__currentLoopData = $types; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $type): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::startLoopIteration(); ?><?php endif; ?>
+                                    <option value="<?php echo e($type->id); ?>">
+                                        <?php echo e($type->name); ?>
+
                                     </option>
-                                @endforeach
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::endLoop(); ?><?php endif; ?><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php \Livewire\Features\SupportCompiledWireKeys\SupportCompiledWireKeys::closeLoop(); ?><?php endif; ?>
                             </select>
 
-                            @error('device_type_id')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__errorArgs = ['device_type_id'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <p class="mt-1 text-sm text-red-600"><?php echo e($message); ?></p>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </div>
 
                         <div>
@@ -495,14 +519,21 @@
                             <input
                                 type="text"
                                 name="property_number"
-                                value="{{ old('property_number') }}"
+                                value="<?php echo e(old('property_number')); ?>"
                                 class="w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                 required
                             >
 
-                            @error('property_number')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__errorArgs = ['property_number'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <p class="mt-1 text-sm text-red-600"><?php echo e($message); ?></p>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </div>
 
                         <div>
@@ -513,14 +544,21 @@
                             <input
                                 type="text"
                                 name="serial_number"
-                                value="{{ old('serial_number') }}"
+                                value="<?php echo e(old('serial_number')); ?>"
                                 class="w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                 placeholder="Enter serial number"
                             >
 
-                            @error('serial_number')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__errorArgs = ['serial_number'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <p class="mt-1 text-sm text-red-600"><?php echo e($message); ?></p>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </div>
 
                         <div>
@@ -531,14 +569,21 @@
                             <input
                                 type="text"
                                 name="brand"
-                                value="{{ old('brand') }}"
+                                value="<?php echo e(old('brand')); ?>"
                                 class="w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                 placeholder="Example: ACER, EPSON, SECURE"
                             >
 
-                            @error('brand')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__errorArgs = ['brand'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <p class="mt-1 text-sm text-red-600"><?php echo e($message); ?></p>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </div>
 
                         <div>
@@ -549,14 +594,21 @@
                             <input
                                 type="text"
                                 name="model"
-                                value="{{ old('model') }}"
+                                value="<?php echo e(old('model')); ?>"
                                 class="w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                 placeholder="Example: L3210, 2199"
                             >
 
-                            @error('model')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__errorArgs = ['model'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <p class="mt-1 text-sm text-red-600"><?php echo e($message); ?></p>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </div>
 
                         <div x-show="isComputerType()" x-cloak>
@@ -567,15 +619,22 @@
                             <input
                                 type="text"
                                 name="mac_address"
-                                value="{{ old('mac_address') }}"
+                                value="<?php echo e(old('mac_address')); ?>"
                                 class="w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                 placeholder="00:1A:2B:3C:4D:5E"
                                 :disabled="!isComputerType()"
                             >
 
-                            @error('mac_address')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__errorArgs = ['mac_address'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <p class="mt-1 text-sm text-red-600"><?php echo e($message); ?></p>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </div>
 
                         <div x-show="isComputerType()" x-cloak>
@@ -586,15 +645,22 @@
                             <input
                                 type="text"
                                 name="specs[os_version]"
-                                value="{{ old('specs.os_version') }}"
+                                value="<?php echo e(old('specs.os_version')); ?>"
                                 class="w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                 placeholder="Example: Windows 10"
                                 :disabled="!isComputerType()"
                             >
 
-                            @error('specs.os_version')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__errorArgs = ['specs.os_version'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <p class="mt-1 text-sm text-red-600"><?php echo e($message); ?></p>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </div>
 
                         <div x-show="isComputerType()" x-cloak>
@@ -605,15 +671,22 @@
                             <input
                                 type="text"
                                 name="specs[memory]"
-                                value="{{ old('specs.memory') }}"
+                                value="<?php echo e(old('specs.memory')); ?>"
                                 class="w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                 placeholder="Example: 8GB RAM"
                                 :disabled="!isComputerType()"
                             >
 
-                            @error('specs.memory')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__errorArgs = ['specs.memory'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <p class="mt-1 text-sm text-red-600"><?php echo e($message); ?></p>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </div>
 
                         <div x-show="isComputerType()" x-cloak>
@@ -624,15 +697,22 @@
                             <input
                                 type="text"
                                 name="specs[storage]"
-                                value="{{ old('specs.storage') }}"
+                                value="<?php echo e(old('specs.storage')); ?>"
                                 class="w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                 placeholder="Example: 256GB SSD / 1TB HDD"
                                 :disabled="!isComputerType()"
                             >
 
-                            @error('specs.storage')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__errorArgs = ['specs.storage'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <p class="mt-1 text-sm text-red-600"><?php echo e($message); ?></p>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </div>
 
                         <div x-show="isComputerType()" x-cloak>
@@ -643,15 +723,22 @@
                             <input
                                 type="text"
                                 name="specs[form_factor]"
-                                value="{{ old('specs.form_factor') }}"
+                                value="<?php echo e(old('specs.form_factor')); ?>"
                                 class="w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                 placeholder="Example: Tower, SFF, Mini PC, All-in-One"
                                 :disabled="!isComputerType()"
                             >
 
-                            @error('specs.form_factor')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__errorArgs = ['specs.form_factor'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <p class="mt-1 text-sm text-red-600"><?php echo e($message); ?></p>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </div>
 
                         <div>
@@ -664,13 +751,20 @@
                                 step="0.01"
                                 min="0"
                                 name="unit_price"
-                                value="{{ old('unit_price') }}"
+                                value="<?php echo e(old('unit_price')); ?>"
                                 class="w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                             >
 
-                            @error('unit_price')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__errorArgs = ['unit_price'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <p class="mt-1 text-sm text-red-600"><?php echo e($message); ?></p>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </div>
 
                         <div>
@@ -681,13 +775,20 @@
                             <input
                                 type="date"
                                 name="date_acquired"
-                                value="{{ old('date_acquired') }}"
+                                value="<?php echo e(old('date_acquired')); ?>"
                                 class="w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                             >
 
-                            @error('date_acquired')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__errorArgs = ['date_acquired'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <p class="mt-1 text-sm text-red-600"><?php echo e($message); ?></p>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </div>
 
                         <div>
@@ -699,18 +800,25 @@
                                 name="condition"
                                 class="w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                             >
-                                <option value="serviceable" @selected(old('condition', 'serviceable') === 'serviceable')>
+                                <option value="serviceable" <?php if(old('condition', 'serviceable') === 'serviceable'): echo 'selected'; endif; ?>>
                                     Serviceable
                                 </option>
 
-                                <option value="unserviceable" @selected(old('condition') === 'unserviceable')>
+                                <option value="unserviceable" <?php if(old('condition') === 'unserviceable'): echo 'selected'; endif; ?>>
                                     Unserviceable
                                 </option>
                             </select>
 
-                            @error('condition')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__errorArgs = ['condition'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <p class="mt-1 text-sm text-red-600"><?php echo e($message); ?></p>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </div>
 
                         <div>
@@ -721,13 +829,20 @@
                             <input
                                 type="date"
                                 name="last_maintenance_date"
-                                value="{{ old('last_maintenance_date') }}"
+                                value="<?php echo e(old('last_maintenance_date')); ?>"
                                 class="w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                             >
 
-                            @error('last_maintenance_date')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__errorArgs = ['last_maintenance_date'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <p class="mt-1 text-sm text-red-600"><?php echo e($message); ?></p>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </div>
                     </div>
 
@@ -741,11 +856,18 @@
                             rows="3"
                             class="w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                             placeholder="Example: Initial check, cleaned, inspected"
-                        >{{ old('maintenance_remarks') }}</textarea>
+                        ><?php echo e(old('maintenance_remarks')); ?></textarea>
 
-                        @error('maintenance_remarks')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__errorArgs = ['maintenance_remarks'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                            <p class="mt-1 text-sm text-red-600"><?php echo e($message); ?></p>
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     </div>
 
                     <div class="mt-5">
@@ -757,11 +879,18 @@
                             name="notes"
                             rows="4"
                             class="w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                        >{{ old('notes') }}</textarea>
+                        ><?php echo e(old('notes')); ?></textarea>
 
-                        @error('notes')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__errorArgs = ['notes'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                            <p class="mt-1 text-sm text-red-600"><?php echo e($message); ?></p>
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     </div>
                 </div>
 
@@ -785,19 +914,19 @@
         </div>
     </div>
 </div>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
     // Bar Chart: Devices by Status
     new Chart(document.getElementById('statusChart'), {
         type: 'bar',
         data: {
-            labels: @json(array_keys($devicesByStatus ?? [])),
+            labels: <?php echo json_encode(array_keys($devicesByStatus ?? []), 15, 512) ?>,
             datasets: [{
                 label: 'Devices',
-                data: @json(array_values($devicesByStatus ?? [])),
+                data: <?php echo json_encode(array_values($devicesByStatus ?? []), 15, 512) ?>,
                 backgroundColor: ['#3b82f6', '#6366f1', '#22c55e', '#ef4444'],
                 borderRadius: 6,
                 borderSkipped: false,
@@ -816,9 +945,9 @@
     new Chart(document.getElementById('typeChart'), {
         type: 'doughnut',
         data: {
-            labels: @json(($devicesByType ?? collect())->keys()),
+            labels: <?php echo json_encode(($devicesByType ?? collect())->keys(), 15, 512) ?>,
             datasets: [{
-                data: @json(($devicesByType ?? collect())->values()),
+                data: <?php echo json_encode(($devicesByType ?? collect())->values(), 15, 512) ?>,
                 backgroundColor: [
                     '#3b82f6','#6366f1','#22c55e','#f59e0b',
                     '#ef4444','#14b8a6','#ec4899','#8b5cf6'
@@ -838,10 +967,10 @@
     new Chart(document.getElementById('officeChart'), {
         type: 'bar',
         data: {
-            labels: @json(($devicesByOffice ?? collect())->keys()),
+            labels: <?php echo json_encode(($devicesByOffice ?? collect())->keys(), 15, 512) ?>,
             datasets: [{
                 label: 'Issued Devices',
-                data: @json(($devicesByOffice ?? collect())->values()),
+                data: <?php echo json_encode(($devicesByOffice ?? collect())->values(), 15, 512) ?>,
                 backgroundColor: '#6366f1',
                 borderRadius: 6,
                 borderSkipped: false,
@@ -857,4 +986,6 @@
         }
     });
 </script>
-@endpush
+<?php $__env->stopPush(); ?>
+
+<?php echo $__env->make('admin.layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\pms_system\resources\views/admin/dashboard.blade.php ENDPATH**/ ?>

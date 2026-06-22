@@ -119,7 +119,7 @@
                 </form>
 
                 <div class="rounded-xl bg-gray-50 border border-gray-200 px-3 py-3">
-                    
+
                     <div class="mt-1 text-sm font-semibold text-gray-900 truncate">
                         Prince De Quiros
                     </div>
@@ -224,6 +224,7 @@
     </div>
 </div>
 
+@stack('scripts')
 @livewireScripts
 </body>
 </html>

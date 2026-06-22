@@ -120,7 +120,7 @@
                 </form>
 
                 <div class="rounded-xl bg-gray-50 border border-gray-200 px-3 py-3">
-                    
+
                     <div class="mt-1 text-sm font-semibold text-gray-900 truncate">
                         Prince De Quiros
                     </div>
@@ -231,7 +231,9 @@
     </div>
 </div>
 
+<?php echo $__env->yieldPushContent('scripts'); ?>
 <?php echo \Livewire\Mechanisms\FrontendAssets\FrontendAssets::scripts(); ?>
 
 </body>
-</html><?php /**PATH C:\xampp\htdocs\pms_system\resources\views/admin/layouts/app.blade.php ENDPATH**/ ?>
+</html>
+<?php /**PATH C:\xampp\htdocs\pms_system\resources\views/admin/layouts/app.blade.php ENDPATH**/ ?>
