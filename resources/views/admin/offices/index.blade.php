@@ -4,25 +4,84 @@
 @section('page_title', 'Offices')
 
 @section('content')
-<div
-    x-data="{
-        addOpen: {{ $errors->any() ? 'true' : 'false' }},
-        editOpen: false,
-        deleteOpen: false,
+@php
+    $addBag = $errors->getBag('add');
+    $editBag = $errors->getBag('edit');
 
-        editOffice: { id: null, name: '' },
+    $oldNames = old('names', []);
+    $bulkSeedCount = $oldNames ? max(1, min(3, count($oldNames))) : 2;
+
+    $bulkRowsSeed = [];
+    for ($i = 0; $i < $bulkSeedCount; $i++) {
+        $bulkRowsSeed[] = [
+            'name' => $oldNames[$i] ?? '',
+            'nameError' => $addBag->first("names.$i"),
+        ];
+    }
+@endphp
+<script>
+document.addEventListener('alpine:init', () => {
+    Alpine.data('officeManager', () => ({
+        addOpen: {{ $addBag->any() ? 'true' : 'false' }},
+        editOpen: {{ $editBag->any() ? 'true' : 'false' }},
+        deleteOpen: false,
+        bulkEnabled: {{ old('names') !== null ? 'true' : 'false' }},
+
+        addSingle: {
+            name: @js(old('name', '')),
+            nameError: @js($addBag->first('name'))
+        },
+
+        bulkRows: @json($bulkRowsSeed),
+
+        editOffice: {
+            id: @js(old('editing_id') !== null ? (int) old('editing_id') : null),
+            name: @js(old('name', '')),
+            nameError: @js($editBag->first('name'))
+        },
         deleteOfficeId: null,
 
+        openAdd() {
+            this.addOpen = true;
+            this.bulkEnabled = false;
+            this.addSingle = { name: '', nameError: '' };
+            this.bulkRows = [
+                { name: '', nameError: '' },
+                { name: '', nameError: '' },
+            ];
+        },
+
+        addBulkRow() {
+            if (this.bulkRows.length < 3) {
+                this.bulkRows.push({ name: '', nameError: '' });
+            }
+        },
+
+        removeBulkRow() {
+            if (this.bulkRows.length > 1) {
+                this.bulkRows.pop();
+            }
+        },
+
         openEdit(office) {
-            this.editOffice = office;
+            this.editOffice = {
+                id: office.id,
+                name: office.name,
+                nameError: ''
+            };
             this.editOpen = true;
         },
 
         openDelete(id) {
             this.deleteOfficeId = id;
             this.deleteOpen = true;
+            this.$nextTick(() => this.$refs.confirmDeleteBtn && this.$refs.confirmDeleteBtn.focus());
         }
-    }"
+    }));
+});
+</script>
+<div
+    x-data="officeManager"
     class="space-y-5"
 >
     {{-- Breadcrumb --}}
@@ -43,7 +102,7 @@
         <button
             type="button"
             class="shrink-0 inline-flex items-center rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700"
-            @click="addOpen = true"
+            @click="openAdd()"
         >
             + Add Office
         </button>
@@ -158,17 +217,81 @@
         <form method="POST" action="{{ route('admin.offices.store', $college) }}" class="space-y-3">
             @csrf
 
-            <div>
-                <label class="text-sm font-medium">Office Name</label>
-                <input
-                    name="name"
-                    value="{{ old('name') }}"
-                    class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
-                    required
+            <div class="flex items-center justify-between">
+                <span class="text-sm font-medium text-gray-700">Add multiple offices</span>
+                <button
+                    type="button"
+                    class="rounded-lg px-3 py-1.5 text-sm font-medium border"
+                    :class="bulkEnabled ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-300'"
+                    @click="bulkEnabled = !bulkEnabled"
                 >
-                @error('name')
-                    <div class="mt-1 text-sm text-red-600">{{ $message }}</div>
-                @enderror
+                    <span x-text="bulkEnabled ? 'Bulk: On' : 'Bulk: Off'"></span>
+                </button>
+            </div>
+
+            <div class="space-y-3">
+                <!-- Bulk controls -->
+                <div x-show="bulkEnabled" class="flex items-center gap-2">
+                    <button
+                        type="button"
+                        class="rounded-lg bg-gray-100 px-3 py-1.5 text-gray-700 hover:bg-gray-200"
+                        @click="removeBulkRow()"
+                    >-
+                    </button>
+
+                    <input type="hidden" name="count" :value="bulkRows.length">
+
+                    <div class="text-sm text-gray-700">
+                        Records: <span class="font-semibold" x-text="bulkRows.length"></span>
+                    </div>
+
+                    <button
+                        type="button"
+                        class="rounded-lg bg-gray-100 px-3 py-1.5 text-gray-700 hover:bg-gray-200"
+                        @click="addBulkRow()"
+                    >+
+                    </button>
+                </div>
+
+                <!-- Bulk form -->
+                <template x-if="bulkEnabled">
+                    <div class="space-y-4">
+                        <template x-for="(row, idx) in bulkRows" :key="idx">
+                            <div class="space-y-2 rounded-lg border border-gray-200 p-3 bg-gray-50">
+                                <div class="text-xs font-semibold text-gray-600" x-text="`Office ${idx + 1}`"></div>
+
+                                <div>
+                                    <label class="text-sm font-medium">Office Name</label>
+                                    <input
+                                        :name="`names[${idx}]`"
+                                        x-model="row.name"
+                                        class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                                        required
+                                        :placeholder="`e.g. Office ${idx + 1}`"
+                                    >
+                                    <div class="mt-1 text-sm text-red-600" x-show="row.nameError" x-text="row.nameError"></div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+
+                <!-- Single form -->
+                <template x-if="!bulkEnabled">
+                    <div class="space-y-3">
+                        <div>
+                            <label class="text-sm font-medium">Office Name</label>
+                            <input
+                                name="name"
+                                x-model="addSingle.name"
+                                class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                                required
+                                placeholder="Enter office name"
+                            >
+                            <div class="mt-1 text-sm text-red-600" x-show="addSingle.nameError" x-text="addSingle.nameError"></div>
+                        </div>
+                    </div>
+                </template>
             </div>
 
             <div class="flex gap-2 pt-2">
@@ -194,6 +317,8 @@
             @csrf
             @method('PUT')
 
+            <input type="hidden" name="editing_id" :value="editOffice.id">
+
             <div>
                 <label class="text-sm font-medium">Office Name</label>
                 <input
@@ -202,6 +327,7 @@
                     x-model="editOffice.name"
                     required
                 >
+                <div class="mt-1 text-sm text-red-600" x-show="editOffice.nameError" x-text="editOffice.nameError"></div>
             </div>
 
             <div class="flex gap-2 pt-2">
@@ -227,12 +353,13 @@
             <form
                 method="POST"
                 :action="`{{ url('/colleges/' . $college->id . '/offices') }}/${deleteOfficeId}`"
+                @submit="if (!deleteOfficeId) $event.preventDefault()"
                 class="flex gap-2"
             >
                 @csrf
                 @method('DELETE')
 
-                <button class="rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700">Yes, Delete</button>
+                <button type="submit" x-ref="confirmDeleteBtn" class="rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700">Confirm</button>
                 <button
                     type="button"
                     class="rounded-lg bg-gray-100 px-4 py-2 text-gray-700 hover:bg-gray-200"

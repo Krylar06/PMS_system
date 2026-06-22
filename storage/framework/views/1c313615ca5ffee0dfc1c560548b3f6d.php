@@ -243,14 +243,14 @@ document.addEventListener('alpine:init', () => {
 
             <div>
                 <div class="flex items-center justify-between gap-3">
-                    <label class="text-sm font-medium">Bulk Add</label>
+                    <label class="text-sm font-medium">Add multiple colleges</label>
                     <button
                         type="button"
                         class="rounded-lg px-3 py-1.5 text-sm font-medium border"
                     x-bind:class="bulkEnabled ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'"
                         @click="bulkEnabled = !bulkEnabled"
                     >
-                        <span x-text="bulkEnabled ? 'ON' : 'OFF'">OFF</span>
+                        <span x-text="bulkEnabled ? 'Bulk: On' : 'Bulk: Off'">OFF</span>
                     </button>
 
 

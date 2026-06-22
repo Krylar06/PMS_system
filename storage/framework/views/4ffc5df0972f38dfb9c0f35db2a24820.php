@@ -95,6 +95,7 @@
         openDelete(id) {
             this.deleteDeviceId = id;
             this.deleteOpen = true;
+            this.$nextTick(() => this.$refs.confirmDeleteBtn && this.$refs.confirmDeleteBtn.focus());
         }
     }"
     class="space-y-5"
@@ -821,12 +822,17 @@ unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendB
                 Are you sure you want to delete this device?
             </div>
 
-            <form method="POST" :action="`<?php echo e(url('/admin/devices')); ?>/${deleteDeviceId}`" class="flex gap-2">
+            <form
+                method="POST"
+                :action="`<?php echo e(url('/admin/devices')); ?>/${deleteDeviceId}`"
+                @submit="if (!deleteDeviceId) $event.preventDefault()"
+                class="flex gap-2"
+            >
                 <?php echo csrf_field(); ?>
                 <?php echo method_field('DELETE'); ?>
 
-                <button class="rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700">
-                    Yes, Delete
+                <button type="submit" x-ref="confirmDeleteBtn" class="rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700">
+                    Confirm
                 </button>
 
                 <button

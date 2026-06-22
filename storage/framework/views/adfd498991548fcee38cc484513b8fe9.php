@@ -3,8 +3,6 @@
 
 <?php $__env->startSection('content'); ?>
 
-<h1 style="color:red">TEST</h1>
-
 <div
     x-data="{
         addOpen: false,
@@ -66,6 +64,7 @@
         openDelete(id) {
             this.deleteDeviceId = id;
             this.deleteOpen = true;
+            this.$nextTick(() => this.$refs.confirmDeleteBtn && this.$refs.confirmDeleteBtn.focus());
         }
     }"
     class="space-y-5"
@@ -101,20 +100,6 @@
             </button>
         </div>
     </div>
-
-    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(session('success')): ?>
-        <div class="rounded-xl bg-green-100 px-4 py-3 text-sm text-green-700">
-            <?php echo e(session('success')); ?>
-
-        </div>
-    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-
-    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(session('error')): ?>
-        <div class="rounded-xl bg-red-100 px-4 py-3 text-sm text-red-700">
-            <?php echo e(session('error')); ?>
-
-        </div>
-    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
     <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($errors->any()): ?>
         <div class="rounded-xl bg-red-100 px-4 py-3 text-sm text-red-700">
@@ -974,15 +959,21 @@
                 Are you sure you want to delete this device?
             </div>
 
-            <form method="POST" :action="`<?php echo e(url('/admin/devices')); ?>/${deleteDeviceId}`" class="flex gap-2">
+            <form
+                method="POST"
+                :action="`<?php echo e(url('/admin/devices')); ?>/${deleteDeviceId}`"
+                @submit="if (!deleteDeviceId) $event.preventDefault()"
+                class="flex gap-2"
+            >
                 <?php echo csrf_field(); ?>
                 <?php echo method_field('DELETE'); ?>
 
                 <button
                     type="submit"
+                    x-ref="confirmDeleteBtn"
                     class="rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700"
                 >
-                    Yes, Delete
+                    Confirm
                 </button>
 
                 <button

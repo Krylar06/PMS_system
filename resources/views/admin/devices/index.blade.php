@@ -5,8 +5,6 @@
 
 @section('content')
 
-<h1 style="color:red">TEST</h1>
-
 <div
     x-data="{
         addOpen: false,
@@ -68,6 +66,7 @@
         openDelete(id) {
             this.deleteDeviceId = id;
             this.deleteOpen = true;
+            this.$nextTick(() => this.$refs.confirmDeleteBtn && this.$refs.confirmDeleteBtn.focus());
         }
     }"
     class="space-y-5"
@@ -103,18 +102,6 @@
             </button>
         </div>
     </div>
-
-    @if(session('success'))
-        <div class="rounded-xl bg-green-100 px-4 py-3 text-sm text-green-700">
-            {{ session('success') }}
-        </div>
-    @endif
-
-    @if(session('error'))
-        <div class="rounded-xl bg-red-100 px-4 py-3 text-sm text-red-700">
-            {{ session('error') }}
-        </div>
-    @endif
 
     @if($errors->any())
         <div class="rounded-xl bg-red-100 px-4 py-3 text-sm text-red-700">
@@ -903,15 +890,21 @@
                 Are you sure you want to delete this device?
             </div>
 
-            <form method="POST" :action="`{{ url('/admin/devices') }}/${deleteDeviceId}`" class="flex gap-2">
+            <form
+                method="POST"
+                :action="`{{ url('/admin/devices') }}/${deleteDeviceId}`"
+                @submit="if (!deleteDeviceId) $event.preventDefault()"
+                class="flex gap-2"
+            >
                 @csrf
                 @method('DELETE')
 
                 <button
                     type="submit"
+                    x-ref="confirmDeleteBtn"
                     class="rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700"
                 >
-                    Yes, Delete
+                    Confirm
                 </button>
 
                 <button

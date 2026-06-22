@@ -4,25 +4,92 @@
 @section('page_title', 'Staff')
 
 @section('content')
-<div
-    x-data="{
-        addOpen:false,
-        editOpen:false,
-        deleteOpen:false,
+@php
+    $addBag = $errors->getBag('add');
+    $editBag = $errors->getBag('edit');
 
-        editStaff:{
-            id:null,
-            first_name:'',
-            last_name:'',
-            position:'',
-            email:'',
-            phone:'',
-            is_active:true
+    $oldStaffRows = old('staff', []);
+    $bulkSeedCount = $oldStaffRows ? max(1, min(3, count($oldStaffRows))) : 2;
+
+    $bulkRowsSeed = [];
+    for ($i = 0; $i < $bulkSeedCount; $i++) {
+        $bulkRowsSeed[] = [
+            'first_name' => $oldStaffRows[$i]['first_name'] ?? '',
+            'last_name' => $oldStaffRows[$i]['last_name'] ?? '',
+            'position' => $oldStaffRows[$i]['position'] ?? '',
+            'email' => $oldStaffRows[$i]['email'] ?? '',
+            'phone' => $oldStaffRows[$i]['phone'] ?? '',
+            'is_active' => $oldStaffRows ? isset($oldStaffRows[$i]['is_active']) : true,
+            'firstNameError' => $addBag->first("staff.$i.first_name"),
+            'lastNameError' => $addBag->first("staff.$i.last_name"),
+            'emailError' => $addBag->first("staff.$i.email"),
+        ];
+    }
+@endphp
+<script>
+document.addEventListener('alpine:init', () => {
+    Alpine.data('staffManager', () => ({
+        addOpen: {{ $addBag->any() ? 'true' : 'false' }},
+        editOpen: {{ $editBag->any() ? 'true' : 'false' }},
+        deleteOpen: false,
+        bulkEnabled: {{ old('staff') !== null ? 'true' : 'false' }},
+
+        addSingle: {
+            first_name: @js(old('first_name', '')),
+            last_name: @js(old('last_name', '')),
+            position: @js(old('position', '')),
+            email: @js(old('email', '')),
+            phone: @js(old('phone', '')),
+            is_active: {{ old('first_name') !== null ? (old('is_active') ? 'true' : 'false') : 'true' }},
+            firstNameError: @js($addBag->first('first_name')),
+            lastNameError: @js($addBag->first('last_name')),
+            emailError: @js($addBag->first('email'))
         },
 
-        deleteStaffId:null,
+        bulkRows: @json($bulkRowsSeed),
 
-        openEdit(staff){
+        editStaff: {
+            id: @js(old('editing_id') !== null ? (int) old('editing_id') : null),
+            first_name: @js(old('first_name', '')),
+            last_name: @js(old('last_name', '')),
+            position: @js(old('position', '')),
+            email: @js(old('email', '')),
+            phone: @js(old('phone', '')),
+            is_active: {{ old('editing_id') !== null ? (old('is_active') ? 'true' : 'false') : 'true' }},
+            firstNameError: @js($editBag->first('first_name')),
+            lastNameError: @js($editBag->first('last_name')),
+            emailError: @js($editBag->first('email'))
+        },
+
+        deleteStaffId: null,
+
+        openAdd() {
+            this.addOpen = true;
+            this.bulkEnabled = false;
+            this.addSingle = {
+                first_name: '', last_name: '', position: '', email: '', phone: '',
+                is_active: true,
+                firstNameError: '', lastNameError: '', emailError: ''
+            };
+            this.bulkRows = [
+                { first_name: '', last_name: '', position: '', email: '', phone: '', is_active: true, firstNameError: '', lastNameError: '', emailError: '' },
+                { first_name: '', last_name: '', position: '', email: '', phone: '', is_active: true, firstNameError: '', lastNameError: '', emailError: '' },
+            ];
+        },
+
+        addBulkRow() {
+            if (this.bulkRows.length < 3) {
+                this.bulkRows.push({ first_name: '', last_name: '', position: '', email: '', phone: '', is_active: true, firstNameError: '', lastNameError: '', emailError: '' });
+            }
+        },
+
+        removeBulkRow() {
+            if (this.bulkRows.length > 1) {
+                this.bulkRows.pop();
+            }
+        },
+
+        openEdit(staff) {
             this.editStaff = {
                 id: staff.id,
                 first_name: staff.first_name ?? '',
@@ -30,16 +97,24 @@
                 position: staff.position ?? '',
                 email: staff.email ?? '',
                 phone: staff.phone ?? '',
-                is_active: !!staff.is_active
-            }
-            this.editOpen = true
+                is_active: !!staff.is_active,
+                firstNameError: '',
+                lastNameError: '',
+                emailError: ''
+            };
+            this.editOpen = true;
         },
 
-        openDelete(id){
-            this.deleteStaffId = id
-            this.deleteOpen = true
+        openDelete(id) {
+            this.deleteStaffId = id;
+            this.deleteOpen = true;
+            this.$nextTick(() => this.$refs.confirmDeleteBtn && this.$refs.confirmDeleteBtn.focus());
         }
-    }"
+    }));
+});
+</script>
+<div
+    x-data="staffManager"
     class="space-y-5"
 >
     {{-- Breadcrumb --}}
@@ -72,18 +147,12 @@
             <button
                 type="button"
                 class="shrink-0 inline-flex items-center rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700"
-                @click="addOpen = true"
+                @click="openAdd()"
             >
                 + Add Staff
             </button>
         </div>
     </div>
-
-    @if(session('success'))
-        <div class="rounded-xl bg-green-100 px-4 py-3 text-sm text-green-700">
-            {{ session('success') }}
-        </div>
-    @endif
 
     @if(session('error'))
         <div class="rounded-xl bg-red-100 px-4 py-3 text-sm text-red-700">
@@ -273,35 +342,152 @@
         <form method="POST" action="{{ route('admin.staff.store', $office) }}" class="space-y-3">
             @csrf
 
-            <div>
-                <label class="text-sm font-medium">First Name</label>
-                <input name="first_name" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2" required>
+            <div class="flex items-center justify-between">
+                <span class="text-sm font-medium text-gray-700">Add multiple staff</span>
+                <button
+                    type="button"
+                    class="rounded-lg px-3 py-1.5 text-sm font-medium border"
+                    :class="bulkEnabled ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-300'"
+                    @click="bulkEnabled = !bulkEnabled"
+                >
+                    <span x-text="bulkEnabled ? 'Bulk: On' : 'Bulk: Off'"></span>
+                </button>
             </div>
 
-            <div>
-                <label class="text-sm font-medium">Last Name</label>
-                <input name="last_name" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2" required>
-            </div>
+            <div class="space-y-3">
+                <!-- Bulk controls -->
+                <div x-show="bulkEnabled" class="flex items-center gap-2">
+                    <button
+                        type="button"
+                        class="rounded-lg bg-gray-100 px-3 py-1.5 text-gray-700 hover:bg-gray-200"
+                        @click="removeBulkRow()"
+                    >-
+                    </button>
 
-            <div>
-                <label class="text-sm font-medium">Position</label>
-                <input name="position" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2">
-            </div>
+                    <div class="text-sm text-gray-700">
+                        Records: <span class="font-semibold" x-text="bulkRows.length"></span>
+                    </div>
 
-            <div>
-                <label class="text-sm font-medium">Email</label>
-                <input name="email" type="email" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2">
-            </div>
+                    <button
+                        type="button"
+                        class="rounded-lg bg-gray-100 px-3 py-1.5 text-gray-700 hover:bg-gray-200"
+                        @click="addBulkRow()"
+                    >+
+                    </button>
+                </div>
 
-            <div>
-                <label class="text-sm font-medium">Phone</label>
-                <input name="phone" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2">
-            </div>
+                <!-- Bulk form -->
+                <template x-if="bulkEnabled">
+                    <div class="space-y-4">
+                        <template x-for="(row, idx) in bulkRows" :key="idx">
+                            <div class="space-y-2 rounded-lg border border-gray-200 p-3 bg-gray-50">
+                                <div class="text-xs font-semibold text-gray-600" x-text="`Staff ${idx + 1}`"></div>
 
-            <label class="flex items-center gap-2 text-sm">
-                <input type="checkbox" name="is_active" value="1" checked>
-                Active
-            </label>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <label class="text-sm font-medium">First Name</label>
+                                        <input
+                                            :name="`staff[${idx}][first_name]`"
+                                            x-model="row.first_name"
+                                            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                                            required
+                                        >
+                                        <div class="mt-1 text-sm text-red-600" x-show="row.firstNameError" x-text="row.firstNameError"></div>
+                                    </div>
+
+                                    <div>
+                                        <label class="text-sm font-medium">Last Name</label>
+                                        <input
+                                            :name="`staff[${idx}][last_name]`"
+                                            x-model="row.last_name"
+                                            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                                            required
+                                        >
+                                        <div class="mt-1 text-sm text-red-600" x-show="row.lastNameError" x-text="row.lastNameError"></div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="text-sm font-medium">Position</label>
+                                    <input
+                                        :name="`staff[${idx}][position]`"
+                                        x-model="row.position"
+                                        class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                                    >
+                                </div>
+
+                                <div>
+                                    <label class="text-sm font-medium">Email</label>
+                                    <input
+                                        :name="`staff[${idx}][email]`"
+                                        x-model="row.email"
+                                        type="email"
+                                        class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                                    >
+                                    <div class="mt-1 text-sm text-red-600" x-show="row.emailError" x-text="row.emailError"></div>
+                                </div>
+
+                                <div>
+                                    <label class="text-sm font-medium">Phone</label>
+                                    <input
+                                        :name="`staff[${idx}][phone]`"
+                                        x-model="row.phone"
+                                        class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                                    >
+                                </div>
+
+                                <label class="flex items-center gap-2 text-sm">
+                                    <input
+                                        type="checkbox"
+                                        :name="`staff[${idx}][is_active]`"
+                                        value="1"
+                                        x-model="row.is_active"
+                                    >
+                                    Active
+                                </label>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+
+                <!-- Single form -->
+                <template x-if="!bulkEnabled">
+                    <div class="space-y-3">
+                        <div>
+                            <label class="text-sm font-medium">First Name</label>
+                            <input name="first_name" x-model="addSingle.first_name" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2" required>
+                            <div class="mt-1 text-sm text-red-600" x-show="addSingle.firstNameError" x-text="addSingle.firstNameError"></div>
+                        </div>
+
+                        <div>
+                            <label class="text-sm font-medium">Last Name</label>
+                            <input name="last_name" x-model="addSingle.last_name" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2" required>
+                            <div class="mt-1 text-sm text-red-600" x-show="addSingle.lastNameError" x-text="addSingle.lastNameError"></div>
+                        </div>
+
+                        <div>
+                            <label class="text-sm font-medium">Position</label>
+                            <input name="position" x-model="addSingle.position" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2">
+                        </div>
+
+                        <div>
+                            <label class="text-sm font-medium">Email</label>
+                            <input name="email" type="email" x-model="addSingle.email" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2">
+                            <div class="mt-1 text-sm text-red-600" x-show="addSingle.emailError" x-text="addSingle.emailError"></div>
+                        </div>
+
+                        <div>
+                            <label class="text-sm font-medium">Phone</label>
+                            <input name="phone" x-model="addSingle.phone" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2">
+                        </div>
+
+                        <label class="flex items-center gap-2 text-sm">
+                            <input type="checkbox" name="is_active" value="1" x-model="addSingle.is_active">
+                            Active
+                        </label>
+                    </div>
+                </template>
+            </div>
 
             <div class="flex gap-2 pt-2">
                 <button class="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">Save</button>
@@ -320,14 +506,18 @@
             @csrf
             @method('PUT')
 
+            <input type="hidden" name="editing_id" :value="editStaff.id">
+
             <div>
                 <label class="text-sm font-medium">First Name</label>
                 <input name="first_name" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2" x-model="editStaff.first_name" required>
+                <div class="mt-1 text-sm text-red-600" x-show="editStaff.firstNameError" x-text="editStaff.firstNameError"></div>
             </div>
 
             <div>
                 <label class="text-sm font-medium">Last Name</label>
                 <input name="last_name" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2" x-model="editStaff.last_name" required>
+                <div class="mt-1 text-sm text-red-600" x-show="editStaff.lastNameError" x-text="editStaff.lastNameError"></div>
             </div>
 
             <div>
@@ -338,6 +528,7 @@
             <div>
                 <label class="text-sm font-medium">Email</label>
                 <input name="email" type="email" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2" x-model="editStaff.email">
+                <div class="mt-1 text-sm text-red-600" x-show="editStaff.emailError" x-text="editStaff.emailError"></div>
             </div>
 
             <div>
@@ -367,12 +558,13 @@
             <form
                 method="POST"
                 :action="`{{ url('/offices/'.$office->id.'/staff') }}/${deleteStaffId}`"
+                @submit="if (!deleteStaffId) $event.preventDefault()"
                 class="flex gap-2"
             >
                 @csrf
                 @method('DELETE')
 
-                <button class="rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700">Yes, Delete</button>
+                <button type="submit" x-ref="confirmDeleteBtn" class="rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700">Confirm</button>
                 <button type="button" class="rounded-lg bg-gray-100 px-4 py-2 text-gray-700 hover:bg-gray-200" @click="deleteOpen=false">Cancel</button>
             </form>
         </div>

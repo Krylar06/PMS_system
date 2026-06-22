@@ -22,13 +22,58 @@ class StaffController extends Controller
 
     public function store(Request $request, Office $office)
     {
-        $data = $request->validate([
-            'first_name' => ['required','string','max:255'],
-            'last_name' => ['required','string','max:255'],
-            'position' => ['nullable','string','max:255'],
-            'email' => ['nullable','email','max:255'],
-            'phone' => ['nullable','string','max:255'],
-            'is_active' => ['sometimes','boolean'],
+        // Single add OR bulk add (array of staff rows: staff[0][first_name], etc.)
+        $isBulk = $request->has('staff');
+
+        if ($isBulk) {
+            $rows = $request->input('staff', []);
+            $count = min(max(count($rows), 0), 3);
+
+            $rules = [];
+            for ($i = 0; $i < $count; $i++) {
+                $rules["staff.$i.first_name"] = ['required', 'string', 'max:255'];
+                $rules["staff.$i.last_name"] = ['required', 'string', 'max:255'];
+                $rules["staff.$i.position"] = ['nullable', 'string', 'max:255'];
+                $rules["staff.$i.email"] = ['nullable', 'email', 'max:255'];
+                $rules["staff.$i.phone"] = ['nullable', 'string', 'max:255'];
+                $rules["staff.$i.is_active"] = ['sometimes', 'boolean'];
+            }
+
+            $data = $request->validateWithBag('add', $rules, [
+                'staff.*.first_name.required' => 'First name is required.',
+                'staff.*.last_name.required' => 'Last name is required.',
+                'staff.*.email.email' => 'Please enter a valid email address.',
+            ], [
+                'staff.*.first_name' => 'first name',
+                'staff.*.last_name' => 'last name',
+                'staff.*.position' => 'position',
+                'staff.*.email' => 'email',
+                'staff.*.phone' => 'phone',
+            ]);
+
+            foreach ($data['staff'] as $row) {
+                Staff::create([
+                    'office_id' => $office->id,
+                    'first_name' => $row['first_name'],
+                    'last_name' => $row['last_name'],
+                    'position' => $row['position'] ?? null,
+                    'email' => $row['email'] ?? null,
+                    'phone' => $row['phone'] ?? null,
+                    'is_active' => (bool) ($row['is_active'] ?? true),
+                ]);
+            }
+
+            return back()->with('success', 'Staff created.');
+        }
+
+        // Single
+        $data = $request->validateWithBag('add', [
+            'first_name' => ['required', 'string', 'max:255'],
+            'last_name' => ['required', 'string', 'max:255'],
+            'position' => ['nullable', 'string', 'max:255'],
+            'email' => ['nullable', 'email', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:255'],
+            'is_active' => ['sometimes', 'boolean'],
         ]);
 
         Staff::create([
@@ -38,7 +83,7 @@ class StaffController extends Controller
             'position' => $data['position'] ?? null,
             'email' => $data['email'] ?? null,
             'phone' => $data['phone'] ?? null,
-            'is_active' => (bool)($data['is_active'] ?? true),
+            'is_active' => (bool) ($data['is_active'] ?? true),
         ]);
 
         return back()->with('success', 'Staff created.');
@@ -56,13 +101,13 @@ class StaffController extends Controller
     {
         abort_unless($staff->office_id === $office->id, 404);
 
-        $data = $request->validate([
-            'first_name' => ['required','string','max:255'],
-            'last_name' => ['required','string','max:255'],
-            'position' => ['nullable','string','max:255'],
-            'email' => ['nullable','email','max:255'],
-            'phone' => ['nullable','string','max:255'],
-            'is_active' => ['sometimes','boolean'],
+        $data = $request->validateWithBag('edit', [
+            'first_name' => ['required', 'string', 'max:255'],
+            'last_name' => ['required', 'string', 'max:255'],
+            'position' => ['nullable', 'string', 'max:255'],
+            'email' => ['nullable', 'email', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:255'],
+            'is_active' => ['sometimes', 'boolean'],
         ]);
 
         $staff->update([
@@ -71,7 +116,7 @@ class StaffController extends Controller
             'position' => $data['position'] ?? null,
             'email' => $data['email'] ?? null,
             'phone' => $data['phone'] ?? null,
-            'is_active' => (bool)($data['is_active'] ?? false),
+            'is_active' => (bool) ($data['is_active'] ?? false),
         ]);
 
         $office->load('college');
