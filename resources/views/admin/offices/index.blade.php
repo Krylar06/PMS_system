@@ -99,13 +99,15 @@ document.addEventListener('alpine:init', () => {
             <h1 class="text-2xl font-semibold text-gray-900">Offices in {{ $college->name }}</h1>
         </div>
 
-        <button
-            type="button"
-            class="shrink-0 inline-flex items-center rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700"
-            @click="openAdd()"
-        >
-            + Add Office
-        </button>
+        @if(auth()->user()->isAdmin())
+            <button
+                type="button"
+                class="shrink-0 inline-flex items-center rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700"
+                @click="openAdd()"
+            >
+                + Add Office
+            </button>
+        @endif
     </div>
 
     {{-- Mobile cards --}}
@@ -123,24 +125,26 @@ document.addEventListener('alpine:init', () => {
                     </div>
 
                     <div class="flex flex-wrap gap-2 pt-1">
-                        <button
-                            type="button"
-                            class="rounded-lg bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-black"
-                            @click="openEdit({
-                                id: {{ $o->id }},
-                                name: @js($o->name)
-                            })"
-                        >
-                            Edit
-                        </button>
+                        @if(auth()->user()->isAdmin())
+                            <button
+                                type="button"
+                                class="rounded-lg bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-black"
+                                @click="openEdit({
+                                    id: {{ $o->id }},
+                                    name: @js($o->name)
+                                })"
+                            >
+                                Edit
+                            </button>
 
-                        <button
-                            type="button"
-                            class="rounded-lg bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700"
-                            @click="openDelete({{ $o->id }})"
-                        >
-                            Delete
-                        </button>
+                            <button
+                                type="button"
+                                class="rounded-lg bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700"
+                                @click="openDelete({{ $o->id }})"
+                            >
+                                Delete
+                            </button>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -175,24 +179,28 @@ document.addEventListener('alpine:init', () => {
 
                             <td class="px-4 py-3 whitespace-nowrap">
                                 <div class="flex items-center gap-2">
-                                    <button
-                                        type="button"
-                                        class="rounded-lg bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-black"
-                                        @click="openEdit({
-                                            id: {{ $o->id }},
-                                            name: @js($o->name)
-                                        })"
-                                    >
-                                        Edit
-                                    </button>
+                                    @if(auth()->user()->isAdmin())
+                                        <button
+                                            type="button"
+                                            class="rounded-lg bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-black"
+                                            @click="openEdit({
+                                                id: {{ $o->id }},
+                                                name: @js($o->name)
+                                            })"
+                                        >
+                                            Edit
+                                        </button>
 
-                                    <button
-                                        type="button"
-                                        class="rounded-lg bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700"
-                                        @click="openDelete({{ $o->id }})"
-                                    >
-                                        Delete
-                                    </button>
+                                        <button
+                                            type="button"
+                                            class="rounded-lg bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700"
+                                            @click="openDelete({{ $o->id }})"
+                                        >
+                                            Delete
+                                        </button>
+                                    @else
+                                        <span class="text-xs text-gray-400">View only</span>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
@@ -255,11 +263,9 @@ document.addEventListener('alpine:init', () => {
 
                 <!-- Bulk form -->
                 <template x-if="bulkEnabled">
-                    <div class="space-y-4">
+                    <div class="space-y-5">
                         <template x-for="(row, idx) in bulkRows" :key="idx">
-                            <div class="space-y-2 rounded-lg border border-gray-200 p-3 bg-gray-50">
-                                <div class="text-xs font-semibold text-gray-600" x-text="`Office ${idx + 1}`"></div>
-
+                            <div class="space-y-3" :class="idx > 0 ? 'pt-4 border-t border-gray-200' : ''">
                                 <div>
                                     <label class="text-sm font-medium">Office Name</label>
                                     <input
@@ -267,7 +273,10 @@ document.addEventListener('alpine:init', () => {
                                         x-model="row.name"
                                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                                         required
-                                        :placeholder="`e.g. Office ${idx + 1}`"
+                                        maxlength="150"
+                                        pattern="[A-Za-zÑñ0-9][A-Za-zÑñ0-9.,&'\-\(\)\s]*"
+                                        title="Letters, numbers, and basic punctuation only"
+                                        placeholder="e.g. Office of the Dean"
                                     >
                                     <div class="mt-1 text-sm text-red-600" x-show="row.nameError" x-text="row.nameError"></div>
                                 </div>
@@ -286,7 +295,10 @@ document.addEventListener('alpine:init', () => {
                                 x-model="addSingle.name"
                                 class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                                 required
-                                placeholder="Enter office name"
+                                maxlength="150"
+                                pattern="[A-Za-zÑñ0-9][A-Za-zÑñ0-9.,&'\-\(\)\s]*"
+                                title="Letters, numbers, and basic punctuation only"
+                                placeholder="e.g. Office of the Dean"
                             >
                             <div class="mt-1 text-sm text-red-600" x-show="addSingle.nameError" x-text="addSingle.nameError"></div>
                         </div>
@@ -326,6 +338,9 @@ document.addEventListener('alpine:init', () => {
                     class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                     x-model="editOffice.name"
                     required
+                    maxlength="150"
+                    pattern="[A-Za-zÑñ0-9][A-Za-zÑñ0-9.,&'\-\(\)\s]*"
+                    title="Letters, numbers, and basic punctuation only"
                 >
                 <div class="mt-1 text-sm text-red-600" x-show="editOffice.nameError" x-text="editOffice.nameError"></div>
             </div>

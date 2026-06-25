@@ -13,11 +13,6 @@
 
         addTypeId: '{{ old('device_type_id', $types->first()?->id) }}',
 
-        addOs: '{{ old('specs.os_version', '') }}',
-        addOsLicense: '{{ old('specs.os_license', '') }}',
-        addOffice: '{{ old('specs.office_version', '') }}',
-        addOfficeLicense: '{{ old('specs.office_license', '') }}',
-
         typeNames: @js($types->pluck('name', 'id')),
 
         editDevice: {
@@ -37,13 +32,9 @@
             condition: 'serviceable',
             specs: {
                 os: '',
-                os_version: '',
-                os_license: '',
                 memory: '',
                 storage: '',
-                form_factor: '',
-                office_version: '',
-                office_license: ''
+                form_factor: ''
             }
         },
 
@@ -61,13 +52,9 @@
         openEdit(device) {
             device.specs = device.specs ?? {};
             device.specs.os = device.specs.os ?? '';
-            device.specs.os_version = device.specs.os_version ?? '';
-            device.specs.os_license = device.specs.os_license ?? '';
             device.specs.memory = device.specs.memory ?? '';
             device.specs.storage = device.specs.storage ?? '';
             device.specs.form_factor = device.specs.form_factor ?? '';
-            device.specs.office_version = device.specs.office_version ?? '';
-            device.specs.office_license = device.specs.office_license ?? '';
             device.serial_number = device.serial_number ?? '';
             device.status = device.status ?? 'available';
             device.condition = device.condition ?? 'serviceable';
@@ -101,7 +88,7 @@
 
             <a
                 href="{{ route('admin.reports.preventiveMaintenance.export') }}"
-                class="shrink-0 inline-flex items-center rounded-xl bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-700"
+                class="shrink-0 inline-flex items-center rounded-xl bg-violet-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-violet-700"
             >
                 Export Excel Report
             </a>
@@ -238,7 +225,7 @@
                             <div>
                                 <div class="text-gray-500">Operating System</div>
                                 <div class="text-gray-900">
-                                    {{ data_get($d->specs, 'os_version', '-') ?: '-' }}
+                                    {{ data_get($d->specs, 'os', '-') ?: '-' }}
                                 </div>
                             </div>
 
@@ -260,13 +247,6 @@
                                 <div class="text-gray-500">Form Factor</div>
                                 <div class="text-gray-900">
                                     {{ data_get($d->specs, 'form_factor', '-') ?: '-' }}
-                                </div>
-                            </div>
-
-                            <div>
-                                <div class="text-gray-500">Microsoft Office</div>
-                                <div class="text-gray-900">
-                                    {{ data_get($d->specs, 'office_version', '-') ?: '-' }}
                                 </div>
                             </div>
                         @endif
@@ -333,26 +313,24 @@
                                 notes: @js($d->notes ?? ''),
                                 specs: {
                                     os: @js(data_get($d->specs, 'os', '')),
-                                    os_version: @js(data_get($d->specs, 'os_version', '')),
-                                    os_license: @js(data_get($d->specs, 'os_license', '')),
                                     memory: @js(data_get($d->specs, 'memory', '')),
                                     storage: @js(data_get($d->specs, 'storage', '')),
-                                    form_factor: @js(data_get($d->specs, 'form_factor', '')),
-                                    office_version: @js(data_get($d->specs, 'office_version', '')),
-                                    office_license: @js(data_get($d->specs, 'office_license', ''))
+                                    form_factor: @js(data_get($d->specs, 'form_factor', ''))
                                 }
                             })"
                         >
                             Edit
                         </button>
 
-                        <button
-                            type="button"
-                            class="rounded-lg bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700"
-                            x-on:click="openDelete({{ $d->id }})"
-                        >
-                            Delete
-                        </button>
+                        @if(auth()->user()->isAdmin())
+                            <button
+                                type="button"
+                                class="rounded-lg bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700"
+                                x-on:click="openDelete({{ $d->id }})"
+                            >
+                                Delete
+                            </button>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -467,27 +445,25 @@
                                             condition: @js($d->condition ?? 'serviceable'),
                                             notes: @js($d->notes ?? ''),
                                             specs: {
-                        os: @js(data_get($d->specs, 'os', '')),
-                        os_version: @js(data_get($d->specs, 'os_version', '')),
-                        os_license: @js(data_get($d->specs, 'os_license', '')),
-                        memory: @js(data_get($d->specs, 'memory', '')),
-                        storage: @js(data_get($d->specs, 'storage', '')),
-                        form_factor: @js(data_get($d->specs, 'form_factor', '')),
-                        office_version: @js(data_get($d->specs, 'office_version', '')),
-                        office_license: @js(data_get($d->specs, 'office_license', ''))
-                    }
+                                                os: @js(data_get($d->specs, 'os', '')),
+                                                memory: @js(data_get($d->specs, 'memory', '')),
+                                                storage: @js(data_get($d->specs, 'storage', '')),
+                                                form_factor: @js(data_get($d->specs, 'form_factor', ''))
+                                            }
                                         })"
                                     >
                                         Edit
                                     </button>
 
-                                    <button
-                                        type="button"
-                                        class="rounded-lg bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700"
-                                        x-on:click="openDelete({{ $d->id }})"
-                                    >
-                                        Delete
-                                    </button>
+                                    @if(auth()->user()->isAdmin())
+                                        <button
+                                            type="button"
+                                            class="rounded-lg bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700"
+                                            x-on:click="openDelete({{ $d->id }})"
+                                        >
+                                            Delete
+                                        </button>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
@@ -538,6 +514,10 @@
                         value="{{ old('property_number') }}"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                         required
+                        maxlength="50"
+                        pattern="[A-Za-z0-9][A-Za-z0-9\-\/]*"
+                        title="Letters, numbers, hyphens, and slashes only"
+                        placeholder="e.g. PN-2026-0001"
                     >
                 </div>
 
@@ -547,6 +527,9 @@
                         name="serial_number"
                         value="{{ old('serial_number') }}"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                        maxlength="100"
+                        pattern="[A-Za-z0-9\-]*"
+                        title="Letters, numbers, and hyphens only"
                         placeholder="Enter serial number"
                     >
                 </div>
@@ -557,6 +540,10 @@
                         name="brand"
                         value="{{ old('brand') }}"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                        maxlength="100"
+                        pattern="[A-Za-zÑñ0-9][A-Za-zÑñ0-9.\-\s]*"
+                        title="Letters and numbers only"
+                        placeholder="e.g. HP, Dell, ASUS"
                     >
                 </div>
 
@@ -566,6 +553,9 @@
                         name="model"
                         value="{{ old('model') }}"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                        maxlength="100"
+                        pattern="[A-Za-z0-9][A-Za-z0-9.\-\/\s]*"
+                        title="Letters and numbers only"
                         placeholder="Example: Epson L3110, Acer Aspire"
                     >
                 </div>
@@ -576,6 +566,9 @@
                         name="mac_address"
                         value="{{ old('mac_address') }}"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                        maxlength="17"
+                        pattern="[0-9A-Fa-f]{2}(:[0-9A-Fa-f]{2}){5}"
+                        title="Format: 00:1A:2B:3C:4D:5E"
                         placeholder="00:1A:2B:3C:4D:5E"
                         :disabled="!isComputerType(addTypeId)"
                     >
@@ -583,66 +576,14 @@
 
                 <div x-show="isComputerType(addTypeId)" x-cloak>
                     <label class="text-sm font-medium">Operating System</label>
-                    <select
-                        name="specs[os_version]"
+                    <input
+                        name="specs[os]"
+                        value="{{ old('specs.os') }}"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
-                        x-model="addOs"
+                        maxlength="100"
+                        placeholder="Example: Windows 10, Windows 11, Ubuntu"
                         :disabled="!isComputerType(addTypeId)"
                     >
-                        <option value="">-- Select OS --</option>
-                        <option value="Windows 7">Windows 7</option>
-                        <option value="Windows 8">Windows 8</option>
-                        <option value="Windows 10">Windows 10</option>
-                        <option value="Windows 11">Windows 11</option>
-                    </select>
-                </div>
-
-                <div x-show="isComputerType(addTypeId) && addOs !== ''" x-cloak>
-                    <label class="text-sm font-medium">OS License Type</label>
-                    <select
-                        name="specs[os_license]"
-                        class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
-                        x-model="addOsLicense"
-                        :disabled="!isComputerType(addTypeId) || addOs === ''"
-                    >
-                        <option value="">-- Select License --</option>
-                        <option value="Cracked">Cracked</option>
-                        <option value="OEM Licensed">OEM Licensed</option>
-                        <option value="Retail Licensed">Retail Licensed</option>
-                    </select>
-                </div>
-
-                <div x-show="isComputerType(addTypeId)" x-cloak>
-                    <label class="text-sm font-medium">Microsoft Office Version</label>
-                    <select
-                        name="specs[office_version]"
-                        class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
-                        x-model="addOffice"
-                        :disabled="!isComputerType(addTypeId)"
-                    >
-                        <option value="">-- Select Office Version --</option>
-                        <option value="Office 2007">Office 2007</option>
-                        <option value="Office 2010">Office 2010</option>
-                        <option value="Office 2013">Office 2013</option>
-                        <option value="Office 2016">Office 2016</option>
-                        <option value="Office 2019">Office 2019</option>
-                        <option value="Office 2021">Office 2021</option>
-                        <option value="Office 365">Office 365</option>
-                    </select>
-                </div>
-
-                <div x-show="isComputerType(addTypeId) && addOffice !== ''" x-cloak>
-                    <label class="text-sm font-medium">Office License Type</label>
-                    <select
-                        name="specs[office_license]"
-                        class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
-                        x-model="addOfficeLicense"
-                        :disabled="!isComputerType(addTypeId) || addOffice === ''"
-                    >
-                        <option value="">-- Select License --</option>
-                        <option value="Cracked">Cracked</option>
-                        <option value="OEM Licensed">OEM Licensed</option>
-                    </select>
                 </div>
 
                 <div x-show="isComputerType(addTypeId)" x-cloak>
@@ -651,6 +592,7 @@
                         name="specs[memory]"
                         value="{{ old('specs.memory') }}"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                        maxlength="50"
                         placeholder="Example: 8GB RAM"
                         :disabled="!isComputerType(addTypeId)"
                     >
@@ -662,6 +604,7 @@
                         name="specs[storage]"
                         value="{{ old('specs.storage') }}"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                        maxlength="50"
                         placeholder="Example: 256GB SSD / 1TB HDD"
                         :disabled="!isComputerType(addTypeId)"
                     >
@@ -673,6 +616,7 @@
                         name="specs[form_factor]"
                         value="{{ old('specs.form_factor') }}"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                        maxlength="50"
                         placeholder="Example: Tower, SFF, Mini PC, All-in-One"
                         :disabled="!isComputerType(addTypeId)"
                     >
@@ -685,6 +629,9 @@
                         value="{{ old('unit_price') }}"
                         type="number"
                         step="0.01"
+                        min="0"
+                        max="9999999999.99"
+                        placeholder="e.g. 25000.00"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                     >
                 </div>
@@ -695,6 +642,7 @@
                         name="date_acquired"
                         value="{{ old('date_acquired') }}"
                         type="date"
+                        max="{{ now()->format('Y-m-d') }}"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                     >
                 </div>
@@ -720,6 +668,7 @@
                         name="last_maintenance_date"
                         value="{{ old('last_maintenance_date') }}"
                         type="date"
+                        max="{{ now()->format('Y-m-d') }}"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                     >
                 </div>
@@ -730,6 +679,7 @@
                 <textarea
                     name="maintenance_remarks"
                     rows="3"
+                    maxlength="1000"
                     class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                     placeholder="Example: Initial check, cleaned, inspected"
                 >{{ old('maintenance_remarks') }}</textarea>
@@ -740,6 +690,7 @@
                 <textarea
                     name="notes"
                     rows="3"
+                    maxlength="2000"
                     class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                 >{{ old('notes') }}</textarea>
             </div>
@@ -795,6 +746,9 @@
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                         x-model="editDevice.property_number"
                         required
+                        maxlength="50"
+                        pattern="[A-Za-z0-9][A-Za-z0-9\-\/]*"
+                        title="Letters, numbers, hyphens, and slashes only"
                     >
                 </div>
 
@@ -804,6 +758,9 @@
                         name="serial_number"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                         x-model="editDevice.serial_number"
+                        maxlength="100"
+                        pattern="[A-Za-z0-9\-]*"
+                        title="Letters, numbers, and hyphens only"
                         placeholder="Enter serial number"
                     >
                 </div>
@@ -814,6 +771,9 @@
                         name="brand"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                         x-model="editDevice.brand"
+                        maxlength="100"
+                        pattern="[A-Za-zÑñ0-9][A-Za-zÑñ0-9.\-\s]*"
+                        title="Letters and numbers only"
                     >
                 </div>
 
@@ -823,6 +783,9 @@
                         name="model"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                         x-model="editDevice.model"
+                        maxlength="100"
+                        pattern="[A-Za-z0-9][A-Za-z0-9.\-\/\s]*"
+                        title="Letters and numbers only"
                         placeholder="Example: Epson L3110, Acer Aspire"
                     >
                 </div>
@@ -833,72 +796,24 @@
                         name="mac_address"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                         x-model="editDevice.mac_address"
+                        maxlength="17"
+                        pattern="[0-9A-Fa-f]{2}(:[0-9A-Fa-f]{2}){5}"
+                        title="Format: 00:1A:2B:3C:4D:5E"
+                        placeholder="00:1A:2B:3C:4D:5E"
                         :disabled="!isComputerType(editDevice.device_type_id)"
                     >
                 </div>
 
                 <div x-show="isComputerType(editDevice.device_type_id)" x-cloak>
                     <label class="text-sm font-medium">Operating System</label>
-                    <select
-                        name="specs[os_version]"
+                    <input
+                        name="specs[os]"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
-                        x-model="editDevice.specs.os_version"
+                        x-model="editDevice.specs.os"
+                        maxlength="100"
+                        placeholder="Example: Windows 10, Windows 11, Ubuntu"
                         :disabled="!isComputerType(editDevice.device_type_id)"
                     >
-                        <option value="">-- Select OS --</option>
-                        <option value="Windows 7">Windows 7</option>
-                        <option value="Windows 8">Windows 8</option>
-                        <option value="Windows 10">Windows 10</option>
-                        <option value="Windows 11">Windows 11</option>
-                    </select>
-                </div>
-
-                <div x-show="isComputerType(editDevice.device_type_id) && editDevice.specs.os_version !== ''" x-cloak>
-                    <label class="text-sm font-medium">OS License Type</label>
-                    <select
-                        name="specs[os_license]"
-                        class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
-                        x-model="editDevice.specs.os_license"
-                        :disabled="!isComputerType(editDevice.device_type_id) || editDevice.specs.os_version === ''"
-                    >
-                        <option value="">-- Select License --</option>
-                        <option value="Cracked">Cracked</option>
-                        <option value="OEM Licensed">OEM Licensed</option>
-                        <option value="Retail Licensed">Retail Licensed</option>
-                    </select>
-                </div>
-
-                <div x-show="isComputerType(editDevice.device_type_id)" x-cloak>
-                    <label class="text-sm font-medium">Microsoft Office Version</label>
-                    <select
-                        name="specs[office_version]"
-                        class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
-                        x-model="editDevice.specs.office_version"
-                        :disabled="!isComputerType(editDevice.device_type_id)"
-                    >
-                        <option value="">-- Select Office Version --</option>
-                        <option value="Office 2007">Office 2007</option>
-                        <option value="Office 2010">Office 2010</option>
-                        <option value="Office 2013">Office 2013</option>
-                        <option value="Office 2016">Office 2016</option>
-                        <option value="Office 2019">Office 2019</option>
-                        <option value="Office 2021">Office 2021</option>
-                        <option value="Office 365">Office 365</option>
-                    </select>
-                </div>
-
-                <div x-show="isComputerType(editDevice.device_type_id) && editDevice.specs.office_version !== ''" x-cloak>
-                    <label class="text-sm font-medium">Office License Type</label>
-                    <select
-                        name="specs[office_license]"
-                        class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
-                        x-model="editDevice.specs.office_license"
-                        :disabled="!isComputerType(editDevice.device_type_id) || editDevice.specs.office_version === ''"
-                    >
-                        <option value="">-- Select License --</option>
-                        <option value="Cracked">Cracked</option>
-                        <option value="OEM Licensed">OEM Licensed</option>
-                    </select>
                 </div>
 
                 <div x-show="isComputerType(editDevice.device_type_id)" x-cloak>
@@ -907,6 +822,7 @@
                         name="specs[memory]"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                         x-model="editDevice.specs.memory"
+                        maxlength="50"
                         placeholder="Example: 8GB RAM"
                         :disabled="!isComputerType(editDevice.device_type_id)"
                     >
@@ -918,6 +834,7 @@
                         name="specs[storage]"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                         x-model="editDevice.specs.storage"
+                        maxlength="50"
                         placeholder="Example: 256GB SSD / 1TB HDD"
                         :disabled="!isComputerType(editDevice.device_type_id)"
                     >
@@ -929,6 +846,7 @@
                         name="specs[form_factor]"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                         x-model="editDevice.specs.form_factor"
+                        maxlength="50"
                         placeholder="Example: Tower, SFF, Mini PC, All-in-One"
                         :disabled="!isComputerType(editDevice.device_type_id)"
                     >
@@ -940,6 +858,8 @@
                         name="unit_price"
                         type="number"
                         step="0.01"
+                        min="0"
+                        max="9999999999.99"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                         x-model="editDevice.unit_price"
                     >
@@ -950,6 +870,7 @@
                     <input
                         name="date_acquired"
                         type="date"
+                        max="{{ now()->format('Y-m-d') }}"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                         x-model="editDevice.date_acquired"
                     >
@@ -972,6 +893,7 @@
                     <input
                         name="last_maintenance_date"
                         type="date"
+                        max="{{ now()->format('Y-m-d') }}"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                         x-model="editDevice.last_maintenance_date"
                     >
@@ -983,6 +905,7 @@
                 <textarea
                     name="maintenance_remarks"
                     rows="3"
+                    maxlength="1000"
                     class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                     x-model="editDevice.maintenance_remarks"
                 ></textarea>
@@ -993,6 +916,7 @@
                 <textarea
                     name="notes"
                     rows="3"
+                    maxlength="2000"
                     class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                     x-model="editDevice.notes"
                 ></textarea>

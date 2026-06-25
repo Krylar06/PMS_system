@@ -148,19 +148,6 @@
         </button>
     </div>
 
-    {{-- Alerts --}}
-    @if(session('success'))
-        <div class="rounded-xl bg-green-100 px-4 py-3 text-sm text-green-700">
-            {{ session('success') }}
-        </div>
-    @endif
-
-    @if(session('error'))
-        <div class="rounded-xl bg-red-100 px-4 py-3 text-sm text-red-700">
-            {{ session('error') }}
-        </div>
-    @endif
-
     @if(session('info'))
         <div class="rounded-xl bg-blue-100 px-4 py-3 text-sm text-blue-700">
             {{ session('info') }}
@@ -290,13 +277,15 @@
                                 Edit
                             </button>
 
-                            <button
-                                type="button"
-                                class="rounded-lg bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700"
-                                @click="openDelete({{ $dev->id }})"
-                            >
-                                Delete
-                            </button>
+                            @if(auth()->user()->isAdmin())
+                                <button
+                                    type="button"
+                                    class="rounded-lg bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700"
+                                    @click="openDelete({{ $dev->id }})"
+                                >
+                                    Delete
+                                </button>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -431,13 +420,15 @@
                                             Edit
                                         </button>
 
-                                        <button
-                                            type="button"
-                                            class="rounded-lg bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700"
-                                            @click="openDelete({{ $dev->id }})"
-                                        >
-                                            Delete
-                                        </button>
+                                        @if(auth()->user()->isAdmin())
+                                            <button
+                                                type="button"
+                                                class="rounded-lg bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700"
+                                                @click="openDelete({{ $dev->id }})"
+                                            >
+                                                Delete
+                                            </button>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>
@@ -613,6 +604,9 @@
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                         x-model="editDevice.property_number"
                         required
+                        maxlength="50"
+                        pattern="[A-Za-z0-9][A-Za-z0-9\-\/]*"
+                        title="Letters, numbers, hyphens, and slashes only"
                     >
                 </div>
 
@@ -622,6 +616,9 @@
                         name="brand"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                         x-model="editDevice.brand"
+                        maxlength="100"
+                        pattern="[A-Za-zÑñ0-9][A-Za-zÑñ0-9.\-\s]*"
+                        title="Letters and numbers only"
                     >
                 </div>
 
@@ -631,6 +628,9 @@
                         name="model"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                         x-model="editDevice.model"
+                        maxlength="100"
+                        pattern="[A-Za-z0-9][A-Za-z0-9.\-\/\s]*"
+                        title="Letters and numbers only"
                     >
                 </div>
 
@@ -640,6 +640,10 @@
                         name="mac_address"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                         x-model="editDevice.mac_address"
+                        maxlength="17"
+                        pattern="[0-9A-Fa-f]{2}(:[0-9A-Fa-f]{2}){5}"
+                        title="Format: 00:1A:2B:3C:4D:5E"
+                        placeholder="00:1A:2B:3C:4D:5E"
                         :disabled="!isComputerType(editDevice.type_name)"
                     >
                 </div>
@@ -647,9 +651,10 @@
                 <div x-show="isComputerType(editDevice.type_name)" x-cloak>
                     <label class="text-sm font-medium">Operating System</label>
                     <input
-                        name="specs[os_version]"
+                        name="specs[os]"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
-                        x-model="editDevice.specs.os_version"
+                        x-model="editDevice.specs.os"
+                        maxlength="100"
                         :disabled="!isComputerType(editDevice.type_name)"
                     >
                 </div>
@@ -660,6 +665,8 @@
                         name="unit_price"
                         type="number"
                         step="0.01"
+                        min="0"
+                        max="9999999999.99"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                         x-model="editDevice.unit_price"
                     >
@@ -670,6 +677,7 @@
                     <input
                         name="date_acquired"
                         type="date"
+                        max="{{ now()->format('Y-m-d') }}"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                         x-model="editDevice.date_acquired"
                     >
@@ -684,7 +692,6 @@
                     >
                         <option value="available">Available</option>
                         <option value="issued">Issued</option>
-                        <option value="maintenance">Maintenance</option>
                         <option value="repair">Repair</option>
                         <option value="retired">Retired</option>
                     </select>
@@ -695,6 +702,7 @@
                     <input
                         name="last_maintenance_date"
                         type="date"
+                        max="{{ now()->format('Y-m-d') }}"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                         x-model="editDevice.last_maintenance_date"
                     >
@@ -706,6 +714,7 @@
                 <textarea
                     name="maintenance_remarks"
                     rows="3"
+                    maxlength="1000"
                     class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                     x-model="editDevice.maintenance_remarks"
                 ></textarea>
@@ -716,6 +725,7 @@
                 <textarea
                     name="notes"
                     rows="3"
+                    maxlength="2000"
                     class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                     x-model="editDevice.notes"
                 ></textarea>
