@@ -81,21 +81,23 @@
                         Edit
                     </button>
 
-                    <form
-                        method="POST"
-                        action="{{ route('admin.devices.destroy', $device) }}"
-                        onsubmit="return confirm('Delete this device?')"
-                    >
-                        @csrf
-                        @method('DELETE')
-
-                        <button
-                            type="submit"
-                            class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+                    @if(auth()->user()->isAdmin())
+                        <form
+                            method="POST"
+                            action="{{ route('admin.devices.destroy', $device) }}"
+                            onsubmit="return confirm('Delete this device?')"
                         >
-                            Delete
-                        </button>
-                    </form>
+                            @csrf
+                            @method('DELETE')
+
+                            <button
+                                type="submit"
+                                class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+                            >
+                                Delete
+                            </button>
+                        </form>
+                    @endif
                 </div>
             </div>
 
@@ -292,6 +294,9 @@
                         value="{{ old('property_number', $device->property_number) }}"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                         required
+                        maxlength="50"
+                        pattern="[A-Za-z0-9][A-Za-z0-9\-\/]*"
+                        title="Letters, numbers, hyphens, and slashes only"
                     >
                 </div>
 
@@ -301,6 +306,9 @@
                         name="serial_number"
                         value="{{ old('serial_number', $device->serial_number) }}"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                        maxlength="100"
+                        pattern="[A-Za-z0-9\-]*"
+                        title="Letters, numbers, and hyphens only"
                         placeholder="Enter serial number"
                     >
                 </div>
@@ -311,6 +319,9 @@
                         name="brand"
                         value="{{ old('brand', $device->brand) }}"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                        maxlength="100"
+                        pattern="[A-Za-zÑñ0-9][A-Za-zÑñ0-9.\-\s]*"
+                        title="Letters and numbers only"
                     >
                 </div>
 
@@ -320,6 +331,9 @@
                         name="model"
                         value="{{ old('model', $device->model) }}"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                        maxlength="100"
+                        pattern="[A-Za-z0-9][A-Za-z0-9.\-\/\s]*"
+                        title="Letters and numbers only"
                     >
                 </div>
 
@@ -329,6 +343,10 @@
                         name="mac_address"
                         value="{{ old('mac_address', $device->mac_address) }}"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                        maxlength="17"
+                        pattern="[0-9A-Fa-f]{2}(:[0-9A-Fa-f]{2}){5}"
+                        title="Format: 00:1A:2B:3C:4D:5E"
+                        placeholder="00:1A:2B:3C:4D:5E"
                         :disabled="!isComputerType()"
                     >
                 </div>
@@ -339,6 +357,7 @@
                         name="specs[os]"
                         value="{{ old('specs.os', data_get($device->specs, 'os')) }}"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                        maxlength="100"
                         :disabled="!isComputerType()"
                     >
                 </div>
@@ -349,6 +368,7 @@
                         name="specs[memory]"
                         value="{{ old('specs.memory', data_get($device->specs, 'memory')) }}"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                        maxlength="50"
                         :disabled="!isComputerType()"
                     >
                 </div>
@@ -359,6 +379,7 @@
                         name="specs[storage]"
                         value="{{ old('specs.storage', data_get($device->specs, 'storage')) }}"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                        maxlength="50"
                         :disabled="!isComputerType()"
                     >
                 </div>
@@ -369,6 +390,7 @@
                         name="specs[form_factor]"
                         value="{{ old('specs.form_factor', data_get($device->specs, 'form_factor')) }}"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                        maxlength="50"
                         :disabled="!isComputerType()"
                     >
                 </div>
@@ -379,6 +401,8 @@
                         name="unit_price"
                         type="number"
                         step="0.01"
+                        min="0"
+                        max="9999999999.99"
                         value="{{ old('unit_price', $device->unit_price) }}"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                     >
@@ -389,6 +413,7 @@
                     <input
                         name="date_acquired"
                         type="date"
+                        max="{{ now()->format('Y-m-d') }}"
                         value="{{ old('date_acquired', $device->date_acquired ? $device->date_acquired->format('Y-m-d') : '') }}"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                     >
@@ -415,6 +440,7 @@
                     <input
                         name="last_maintenance_date"
                         type="date"
+                        max="{{ now()->format('Y-m-d') }}"
                         value="{{ old('last_maintenance_date', $device->last_maintenance_date ? $device->last_maintenance_date->format('Y-m-d') : '') }}"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                     >
@@ -426,6 +452,7 @@
                 <textarea
                     name="maintenance_remarks"
                     rows="3"
+                    maxlength="1000"
                     class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                 >{{ old('maintenance_remarks', $device->maintenance_remarks) }}</textarea>
             </div>
@@ -435,6 +462,7 @@
                 <textarea
                     name="notes"
                     rows="3"
+                    maxlength="2000"
                     class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                 >{{ old('notes', $device->notes) }}</textarea>
             </div>

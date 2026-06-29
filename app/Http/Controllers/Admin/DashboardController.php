@@ -1,25 +1,18 @@
 <?php
-
 namespace App\Http\Controllers\Admin;
-
 use App\Http\Controllers\Controller;
 use App\Models\Device;
 use App\Models\DeviceAssignment;
 use App\Models\DeviceMaintenanceRecord;
 use App\Models\DeviceType;
-
 class DashboardController extends Controller
 {
     public function index()
     {
         $totalDevices = Device::count();
-
         $availableDevices = Device::where('status', 'available')->count();
-
         $issuedDevices = Device::where('status', 'issued')->count();
-
         $serviceableDevices = Device::where('condition', 'serviceable')->count();
-
         $unserviceableDevices = Device::where('condition', 'unserviceable')->count();
 
         $recentIssuedDevices = DeviceAssignment::query()
@@ -43,13 +36,8 @@ class DashboardController extends Controller
             ->get();
 
         $allowedTypes = [
-            'Desktop',
-            'Laptop',
-            'Printer',
-            'Monitor',
-            'UPS',
-            'AVR',
-            'Other',
+            'Desktop', 'Laptop', 'Printer',
+            'Monitor', 'UPS', 'AVR', 'Other',
         ];
 
         foreach ($allowedTypes as $typeName) {
@@ -66,6 +54,28 @@ class DashboardController extends Controller
             })
             ->values();
 
+        // --- Chart data ---
+
+        $devicesByStatus = [
+            'Available'     => Device::where('status', 'available')->count(),
+            'Issued'        => Device::where('status', 'issued')->count(),
+            'Serviceable'   => Device::where('condition', 'serviceable')->count(),
+            'Unserviceable' => Device::where('condition', 'unserviceable')->count(),
+        ];
+
+        $devicesByType = Device::selectRaw('device_type_id, count(*) as total')
+            ->with('type')
+            ->groupBy('device_type_id')
+            ->get()
+            ->mapWithKeys(fn($d) => [$d->type?->name ?? 'Unknown' => $d->total]);
+
+        $devicesByOffice = DeviceAssignment::with('staff.office')
+            ->whereNotNull('issued_at')
+            ->whereNull('returned_at')
+            ->get()
+            ->groupBy(fn($a) => $a->staff?->office?->name ?? 'No Office')
+            ->map->count();
+
         return view('admin.dashboard', compact(
             'totalDevices',
             'availableDevices',
@@ -74,7 +84,10 @@ class DashboardController extends Controller
             'unserviceableDevices',
             'recentIssuedDevices',
             'recentMaintenanceRecords',
-            'types'
+            'types',
+            'devicesByStatus',
+            'devicesByType',
+            'devicesByOffice',
         ));
     }
 }

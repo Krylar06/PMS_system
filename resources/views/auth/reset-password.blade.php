@@ -23,6 +23,7 @@
             value="{{ old('email', $email) }}"
             class="w-full border rounded px-3 py-2 mb-3"
             required
+            maxlength="255"
         >
 
         <label class="block mb-2 text-sm">New Password</label>
@@ -31,6 +32,7 @@
             type="password"
             class="w-full border rounded px-3 py-2 mb-3"
             required
+            minlength="8"
         >
 
         <label class="block mb-2 text-sm">Confirm Password</label>
@@ -39,6 +41,7 @@
             type="password"
             class="w-full border rounded px-3 py-2 mb-3"
             required
+            minlength="8"
         >
 
         @if ($errors->any())

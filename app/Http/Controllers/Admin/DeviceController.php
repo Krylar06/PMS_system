@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Exports\PreventiveMaintenanceReportExport;
+use App\Models\ActivityLog;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreDeviceRequest;
 use App\Http\Requests\UpdateDeviceRequest;
@@ -95,7 +96,9 @@ class DeviceController extends Controller
 
         $data = $this->cleanDeviceDataByType($data);
 
-        Device::create($data);
+        $device = Device::create($data);
+
+        ActivityLog::record('created', "Added device \"{$device->property_number}\"", $device);
 
         return redirect()
             ->back()
@@ -145,6 +148,8 @@ class DeviceController extends Controller
 
         $device->update($data);
 
+        ActivityLog::record('updated', "Updated device \"{$device->property_number}\"", $device);
+
         return redirect()
             ->route('admin.devices.index')
             ->with('success', 'Device updated.');
@@ -152,7 +157,10 @@ class DeviceController extends Controller
 
     public function destroy(Device $device)
     {
+        $propertyNumber = $device->property_number;
         $device->delete();
+
+        ActivityLog::record('deleted', "Deleted device \"{$propertyNumber}\"");
 
         return redirect()
             ->route('admin.devices.index')
@@ -170,31 +178,40 @@ class DeviceController extends Controller
             'property_number' => [
                 'required',
                 'string',
-                'max:255',
+                'max:50',
+                'regex:' . StoreDeviceRequest::PROPERTY_NUMBER_REGEX,
                 'unique:devices,property_number,' . $device->id,
             ],
 
-            'serial_number' => ['nullable', 'string', 'max:255'],
+            'serial_number' => ['nullable', 'string', 'max:100', 'regex:' . StoreDeviceRequest::SERIAL_NUMBER_REGEX],
 
-            'brand' => ['nullable', 'string', 'max:255'],
-            'model' => ['nullable', 'string', 'max:255'],
-            'mac_address' => ['nullable', 'string', 'max:255'],
+            'brand' => ['nullable', 'string', 'max:100', 'regex:' . StoreDeviceRequest::BRAND_MODEL_REGEX],
+            'model' => ['nullable', 'string', 'max:100', 'regex:' . StoreDeviceRequest::BRAND_MODEL_REGEX],
+            'mac_address' => ['nullable', 'string', 'regex:' . StoreDeviceRequest::MAC_ADDRESS_REGEX],
 
             'unit_price' => ['nullable', 'numeric', 'min:0', 'max:9999999999.99'],
-            'date_acquired' => ['nullable', 'date'],
+            'date_acquired' => ['nullable', 'date', 'before_or_equal:today'],
 
             'condition' => ['nullable', 'in:serviceable,unserviceable'],
             'status' => ['nullable', 'in:available,issued,repair,retired'],
 
-            'last_maintenance_date' => ['nullable', 'date'],
-            'maintenance_remarks' => ['nullable', 'string'],
-            'notes' => ['nullable', 'string'],
+            'last_maintenance_date' => ['nullable', 'date', 'before_or_equal:today'],
+            'maintenance_remarks' => ['nullable', 'string', 'max:1000'],
+            'notes' => ['nullable', 'string', 'max:2000'],
 
             'specs' => ['nullable', 'array'],
-            'specs.os' => ['nullable', 'string', 'max:255'],
-            'specs.memory' => ['nullable', 'string', 'max:255'],
-            'specs.storage' => ['nullable', 'string', 'max:255'],
-            'specs.form_factor' => ['nullable', 'string', 'max:255'],
+            'specs.os' => ['nullable', 'string', 'max:100'],
+            'specs.memory' => ['nullable', 'string', 'max:50'],
+            'specs.storage' => ['nullable', 'string', 'max:50'],
+            'specs.form_factor' => ['nullable', 'string', 'max:50'],
+        ], [
+            'property_number.regex' => 'Property number may only contain letters, numbers, hyphens, and slashes.',
+            'serial_number.regex' => 'Serial number may only contain letters, numbers, and hyphens.',
+            'brand.regex' => 'Brand may only contain letters and numbers.',
+            'model.regex' => 'Model may only contain letters and numbers.',
+            'mac_address.regex' => 'Please enter a valid MAC address, e.g. 00:1A:2B:3C:4D:5E.',
+            'date_acquired.before_or_equal' => 'Date acquired cannot be in the future.',
+            'last_maintenance_date.before_or_equal' => 'Last maintenance date cannot be in the future.',
         ]);
 
         /*
@@ -213,6 +230,8 @@ class DeviceController extends Controller
 
         $device->update($data);
 
+        ActivityLog::record('updated', "Updated device \"{$device->property_number}\" (quick edit)", $device);
+
         return back()->with('success', 'Device updated.');
     }
 
@@ -223,9 +242,11 @@ class DeviceController extends Controller
     public function markChecked(Request $request, Device $device)
     {
         $data = $request->validate([
-            'maintenance_date' => ['nullable', 'date'],
-            'maintenance_type' => ['nullable', 'string', 'max:255'],
-            'remarks' => ['nullable', 'string'],
+            'maintenance_date' => ['nullable', 'date', 'before_or_equal:today'],
+            'maintenance_type' => ['nullable', 'string', 'max:100'],
+            'remarks' => ['nullable', 'string', 'max:1000'],
+        ], [
+            'maintenance_date.before_or_equal' => 'Maintenance date cannot be in the future.',
         ]);
 
         $maintenanceDate = $data['maintenance_date'] ?? now()->toDateString();
@@ -244,6 +265,8 @@ class DeviceController extends Controller
             'last_maintenance_date' => $maintenanceDate,
             'maintenance_remarks' => $remarks,
         ]);
+
+        ActivityLog::record('updated', "Marked device \"{$device->property_number}\" as checked/maintained", $device);
 
         return redirect()
             ->route('admin.devices.show', $device->id)

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\ActivityLog;
 use App\Models\Staff;
 use App\Models\Device;
 use App\Models\DeviceAssignment;
@@ -81,6 +82,8 @@ class StaffDeviceController extends Controller
             'status' => 'issued',
         ]);
 
+        ActivityLog::record('issued', "Issued device \"{$device->property_number}\" to {$staff->first_name} {$staff->last_name}", $device);
+
         return back()->with('success', 'Device issued successfully.');
     }
 
@@ -102,6 +105,8 @@ class StaffDeviceController extends Controller
             $assignment->device->update([
                 'status' => 'available',
             ]);
+
+            ActivityLog::record('returned', "Returned device \"{$assignment->device->property_number}\" from {$staff->first_name} {$staff->last_name}", $assignment->device);
         }
 
         return back()->with('success', 'Device returned successfully.');

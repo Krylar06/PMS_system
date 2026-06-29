@@ -41,7 +41,10 @@
                 <input name="property_number"
                        value="{{ old('property_number') }}"
                        class="mt-1 w-full border rounded px-3 py-2"
-                       required>
+                       required
+                       maxlength="50"
+                       pattern="[A-Za-z0-9][A-Za-z0-9\-\/]*"
+                       title="Letters, numbers, hyphens, and slashes only">
                 @error('property_number')
                     <div class="text-sm text-red-600 mt-1">{{ $message }}</div>
                 @enderror
@@ -51,6 +54,9 @@
             <div>
                 <label class="text-sm font-medium">Brand</label>
                 <input name="brand"
+                       maxlength="100"
+                       pattern="[A-Za-zÑñ0-9][A-Za-zÑñ0-9.\-\s]*"
+                       title="Letters and numbers only"
                        value="{{ old('brand') }}"
                        class="mt-1 w-full border rounded px-3 py-2">
                 @error('brand')
@@ -64,6 +70,8 @@
                 <input name="unit_price"
                        type="number"
                        step="0.01"
+                       min="0"
+                       max="9999999999.99"
                        value="{{ old('unit_price') }}"
                        class="mt-1 w-full border rounded px-3 py-2">
                 @error('unit_price')
@@ -77,7 +85,7 @@
                 <input name="mac_address"
                        value="{{ old('mac_address') }}"
                        class="mt-1 w-full border rounded px-3 py-2"
-                       placeholder="00:1A:2B:3C:4D:5E">
+                       maxlength="17" pattern="[0-9A-Fa-f]{2}(:[0-9A-Fa-f]{2}){5}" title="Format: 00:1A:2B:3C:4D:5E" placeholder="00:1A:2B:3C:4D:5E">
                 @error('mac_address')
                     <div class="text-sm text-red-600 mt-1">{{ $message }}</div>
                 @enderror
@@ -87,6 +95,7 @@
             <div>
                 <label class="text-sm font-medium">Date Acquired</label>
                 <input type="date"
+                       max="{{ now()->format('Y-m-d') }}"
                        name="date_acquired"
                        value="{{ old('date_acquired') }}"
                        class="mt-1 w-full border rounded px-3 py-2">
@@ -114,7 +123,7 @@
         {{-- Notes --}}
         <div>
             <label class="text-sm font-medium">Notes</label>
-            <textarea name="notes" rows="4"
+            <textarea name="notes" rows="4" maxlength="2000"
                       class="mt-1 w-full border rounded px-3 py-2">{{ old('notes') }}</textarea>
             @error('notes')
                 <div class="text-sm text-red-600 mt-1">{{ $message }}</div>

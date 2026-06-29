@@ -103,6 +103,30 @@
                     </svg>
                     <span>QR Scanner</span>
                 </a>
+
+                @if(auth()->user() && auth()->user()->isAdmin())
+                    <a
+                        href="{{ route('admin.users.index') }}"
+                        class="group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition
+                        {{ request()->routeIs('admin.users.*') ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100' }}"
+                    >
+                        <svg class="w-5 h-5 {{ request()->routeIs('admin.users.*') ? 'text-blue-600' : 'text-gray-500 group-hover:text-gray-700' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m5-4a4 4 0 100-8 4 4 0 000 8zm6 4a4 4 0 10-8 0v2h8v-2z"/>
+                        </svg>
+                        <span>Users</span>
+                    </a>
+
+                    <a
+                        href="{{ route('admin.logs.index') }}"
+                        class="group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition
+                        {{ request()->routeIs('admin.logs.*') ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100' }}"
+                    >
+                        <svg class="w-5 h-5 {{ request()->routeIs('admin.logs.*') ? 'text-blue-600' : 'text-gray-500 group-hover:text-gray-700' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 7h6m-6 4h6"/>
+                        </svg>
+                        <span>Activity Logs</span>
+                    </a>
+                @endif
             </nav>
 
             <div class="mt-6 border-t border-gray-200 pt-4 space-y-4">
@@ -119,13 +143,22 @@
                 </form>
 
                 <div class="rounded-xl bg-gray-50 border border-gray-200 px-3 py-3">
-                    
-                    <div class="mt-1 text-sm font-semibold text-gray-900 truncate">
-                        Prince De Quiros
-                    </div>
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="min-w-0">
+                            <div class="text-sm font-semibold text-gray-900 truncate">
+                                {{ auth()->user()->name ?? 'User' }}
+                            </div>
 
-                    <div class="text-xs text-gray-500 truncate">
-                        princedequiros@gmail.com
+                            <div class="text-xs text-gray-500 truncate">
+                                {{ auth()->user()->email ?? '' }}
+                            </div>
+                        </div>
+
+                        @if(auth()->user())
+                            <span class="shrink-0 inline-flex rounded-full {{ auth()->user()->isAdmin() ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700' }} px-2 py-0.5 text-[11px] font-medium">
+                                {{ auth()->user()->roleLabel() }}
+                            </span>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -224,6 +257,7 @@
     </div>
 </div>
 
+@stack('scripts')
 @livewireScripts
 </body>
 </html>

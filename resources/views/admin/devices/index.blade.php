@@ -322,13 +322,15 @@
                             Edit
                         </button>
 
-                        <button
-                            type="button"
-                            class="rounded-lg bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700"
-                            x-on:click="openDelete({{ $d->id }})"
-                        >
-                            Delete
-                        </button>
+                        @if(auth()->user()->isAdmin())
+                            <button
+                                type="button"
+                                class="rounded-lg bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700"
+                                x-on:click="openDelete({{ $d->id }})"
+                            >
+                                Delete
+                            </button>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -453,13 +455,15 @@
                                         Edit
                                     </button>
 
-                                    <button
-                                        type="button"
-                                        class="rounded-lg bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700"
-                                        x-on:click="openDelete({{ $d->id }})"
-                                    >
-                                        Delete
-                                    </button>
+                                    @if(auth()->user()->isAdmin())
+                                        <button
+                                            type="button"
+                                            class="rounded-lg bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700"
+                                            x-on:click="openDelete({{ $d->id }})"
+                                        >
+                                            Delete
+                                        </button>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
@@ -510,6 +514,10 @@
                         value="{{ old('property_number') }}"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                         required
+                        maxlength="50"
+                        pattern="[A-Za-z0-9][A-Za-z0-9\-\/]*"
+                        title="Letters, numbers, hyphens, and slashes only"
+                        placeholder="e.g. PN-2026-0001"
                     >
                 </div>
 
@@ -519,6 +527,9 @@
                         name="serial_number"
                         value="{{ old('serial_number') }}"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                        maxlength="100"
+                        pattern="[A-Za-z0-9\-]*"
+                        title="Letters, numbers, and hyphens only"
                         placeholder="Enter serial number"
                     >
                 </div>
@@ -529,6 +540,10 @@
                         name="brand"
                         value="{{ old('brand') }}"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                        maxlength="100"
+                        pattern="[A-Za-zÑñ0-9][A-Za-zÑñ0-9.\-\s]*"
+                        title="Letters and numbers only"
+                        placeholder="e.g. HP, Dell, ASUS"
                     >
                 </div>
 
@@ -538,6 +553,9 @@
                         name="model"
                         value="{{ old('model') }}"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                        maxlength="100"
+                        pattern="[A-Za-z0-9][A-Za-z0-9.\-\/\s]*"
+                        title="Letters and numbers only"
                         placeholder="Example: Epson L3110, Acer Aspire"
                     >
                 </div>
@@ -548,6 +566,9 @@
                         name="mac_address"
                         value="{{ old('mac_address') }}"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                        maxlength="17"
+                        pattern="[0-9A-Fa-f]{2}(:[0-9A-Fa-f]{2}){5}"
+                        title="Format: 00:1A:2B:3C:4D:5E"
                         placeholder="00:1A:2B:3C:4D:5E"
                         :disabled="!isComputerType(addTypeId)"
                     >
@@ -559,6 +580,7 @@
                         name="specs[os]"
                         value="{{ old('specs.os') }}"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                        maxlength="100"
                         placeholder="Example: Windows 10, Windows 11, Ubuntu"
                         :disabled="!isComputerType(addTypeId)"
                     >
@@ -570,6 +592,7 @@
                         name="specs[memory]"
                         value="{{ old('specs.memory') }}"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                        maxlength="50"
                         placeholder="Example: 8GB RAM"
                         :disabled="!isComputerType(addTypeId)"
                     >
@@ -581,6 +604,7 @@
                         name="specs[storage]"
                         value="{{ old('specs.storage') }}"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                        maxlength="50"
                         placeholder="Example: 256GB SSD / 1TB HDD"
                         :disabled="!isComputerType(addTypeId)"
                     >
@@ -592,6 +616,7 @@
                         name="specs[form_factor]"
                         value="{{ old('specs.form_factor') }}"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                        maxlength="50"
                         placeholder="Example: Tower, SFF, Mini PC, All-in-One"
                         :disabled="!isComputerType(addTypeId)"
                     >
@@ -604,6 +629,9 @@
                         value="{{ old('unit_price') }}"
                         type="number"
                         step="0.01"
+                        min="0"
+                        max="9999999999.99"
+                        placeholder="e.g. 25000.00"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                     >
                 </div>
@@ -614,6 +642,7 @@
                         name="date_acquired"
                         value="{{ old('date_acquired') }}"
                         type="date"
+                        max="{{ now()->format('Y-m-d') }}"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                     >
                 </div>
@@ -639,6 +668,7 @@
                         name="last_maintenance_date"
                         value="{{ old('last_maintenance_date') }}"
                         type="date"
+                        max="{{ now()->format('Y-m-d') }}"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                     >
                 </div>
@@ -649,6 +679,7 @@
                 <textarea
                     name="maintenance_remarks"
                     rows="3"
+                    maxlength="1000"
                     class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                     placeholder="Example: Initial check, cleaned, inspected"
                 >{{ old('maintenance_remarks') }}</textarea>
@@ -659,6 +690,7 @@
                 <textarea
                     name="notes"
                     rows="3"
+                    maxlength="2000"
                     class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                 >{{ old('notes') }}</textarea>
             </div>
@@ -714,6 +746,9 @@
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                         x-model="editDevice.property_number"
                         required
+                        maxlength="50"
+                        pattern="[A-Za-z0-9][A-Za-z0-9\-\/]*"
+                        title="Letters, numbers, hyphens, and slashes only"
                     >
                 </div>
 
@@ -723,6 +758,9 @@
                         name="serial_number"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                         x-model="editDevice.serial_number"
+                        maxlength="100"
+                        pattern="[A-Za-z0-9\-]*"
+                        title="Letters, numbers, and hyphens only"
                         placeholder="Enter serial number"
                     >
                 </div>
@@ -733,6 +771,9 @@
                         name="brand"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                         x-model="editDevice.brand"
+                        maxlength="100"
+                        pattern="[A-Za-zÑñ0-9][A-Za-zÑñ0-9.\-\s]*"
+                        title="Letters and numbers only"
                     >
                 </div>
 
@@ -742,6 +783,9 @@
                         name="model"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                         x-model="editDevice.model"
+                        maxlength="100"
+                        pattern="[A-Za-z0-9][A-Za-z0-9.\-\/\s]*"
+                        title="Letters and numbers only"
                         placeholder="Example: Epson L3110, Acer Aspire"
                     >
                 </div>
@@ -752,6 +796,10 @@
                         name="mac_address"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                         x-model="editDevice.mac_address"
+                        maxlength="17"
+                        pattern="[0-9A-Fa-f]{2}(:[0-9A-Fa-f]{2}){5}"
+                        title="Format: 00:1A:2B:3C:4D:5E"
+                        placeholder="00:1A:2B:3C:4D:5E"
                         :disabled="!isComputerType(editDevice.device_type_id)"
                     >
                 </div>
@@ -762,6 +810,7 @@
                         name="specs[os]"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                         x-model="editDevice.specs.os"
+                        maxlength="100"
                         placeholder="Example: Windows 10, Windows 11, Ubuntu"
                         :disabled="!isComputerType(editDevice.device_type_id)"
                     >
@@ -773,6 +822,7 @@
                         name="specs[memory]"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                         x-model="editDevice.specs.memory"
+                        maxlength="50"
                         placeholder="Example: 8GB RAM"
                         :disabled="!isComputerType(editDevice.device_type_id)"
                     >
@@ -784,6 +834,7 @@
                         name="specs[storage]"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                         x-model="editDevice.specs.storage"
+                        maxlength="50"
                         placeholder="Example: 256GB SSD / 1TB HDD"
                         :disabled="!isComputerType(editDevice.device_type_id)"
                     >
@@ -795,6 +846,7 @@
                         name="specs[form_factor]"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                         x-model="editDevice.specs.form_factor"
+                        maxlength="50"
                         placeholder="Example: Tower, SFF, Mini PC, All-in-One"
                         :disabled="!isComputerType(editDevice.device_type_id)"
                     >
@@ -806,6 +858,8 @@
                         name="unit_price"
                         type="number"
                         step="0.01"
+                        min="0"
+                        max="9999999999.99"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                         x-model="editDevice.unit_price"
                     >
@@ -816,6 +870,7 @@
                     <input
                         name="date_acquired"
                         type="date"
+                        max="{{ now()->format('Y-m-d') }}"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                         x-model="editDevice.date_acquired"
                     >
@@ -838,6 +893,7 @@
                     <input
                         name="last_maintenance_date"
                         type="date"
+                        max="{{ now()->format('Y-m-d') }}"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                         x-model="editDevice.last_maintenance_date"
                     >
@@ -849,6 +905,7 @@
                 <textarea
                     name="maintenance_remarks"
                     rows="3"
+                    maxlength="1000"
                     class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                     x-model="editDevice.maintenance_remarks"
                 ></textarea>
@@ -859,6 +916,7 @@
                 <textarea
                     name="notes"
                     rows="3"
+                    maxlength="2000"
                     class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                     x-model="editDevice.notes"
                 ></textarea>
