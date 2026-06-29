@@ -146,13 +146,6 @@
                     </div>
 
                     <div>
-                        <div class="text-sm text-gray-500">Operating System</div>
-                        <div class="font-medium text-gray-900">
-                            {{ data_get($device->specs, 'os', '-') ?: '-' }}
-                        </div>
-                    </div>
-
-                    <div>
                         <div class="text-sm text-gray-500">Memory</div>
                         <div class="font-medium text-gray-900">
                             {{ data_get($device->specs, 'memory', '-') ?: '-' }}
@@ -172,7 +165,28 @@
                             {{ data_get($device->specs, 'form_factor', '-') ?: '-' }}
                         </div>
                     </div>
+                    <div>
+                        <div class="text-sm text-gray-500">OS Version</div>
+                        <div class="font-medium text-gray-900">{{ $device->os_version ?: '-' }}</div>
+                    </div>
+
+                    <div>
+                        <div class="text-sm text-gray-500">OS License</div>
+                        <div class="font-medium text-gray-900">{{ $device->os_license ?: '-' }}</div>
+                    </div>
+
+                    <div>
+                        <div class="text-sm text-gray-500">MS Office Version</div>
+                        <div class="font-medium text-gray-900">{{ $device->ms_office_version ?: '-' }}</div>
+                    </div>
+
+                    <div>
+                        <div class="text-sm text-gray-500">MS Office License</div>
+                        <div class="font-medium text-gray-900">{{ $device->ms_office_license ?: '-' }}</div>
+                    </div>
                 @endif
+
+
 
                 <div>
                     <div class="text-sm text-gray-500">Unit Price</div>
@@ -351,16 +365,7 @@
                     >
                 </div>
 
-                <div x-show="isComputerType()" x-cloak>
-                    <label class="text-sm font-medium">Operating System</label>
-                    <input
-                        name="specs[os]"
-                        value="{{ old('specs.os', data_get($device->specs, 'os')) }}"
-                        class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
-                        maxlength="100"
-                        :disabled="!isComputerType()"
-                    >
-                </div>
+
 
                 <div x-show="isComputerType()" x-cloak>
                     <label class="text-sm font-medium">Memory</label>
@@ -394,6 +399,54 @@
                         :disabled="!isComputerType()"
                     >
                 </div>
+
+                {{-- OS Version --}}
+                <div id="show_os_version_wrapper" style="display:none;">
+                    <label class="text-sm font-medium">OS Version</label>
+                    <select name="os_version" id="show_os_version_select" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2">
+                        <option value="">-- Select OS --</option>
+                        <option value="Windows 7" {{ old('os_version', $device->os_version) === 'Windows 7' ? 'selected' : '' }}>Windows 7</option>
+                        <option value="Windows 8" {{ old('os_version', $device->os_version) === 'Windows 8' ? 'selected' : '' }}>Windows 8</option>
+                        <option value="Windows 10" {{ old('os_version', $device->os_version) === 'Windows 10' ? 'selected' : '' }}>Windows 10</option>
+                        <option value="Windows 11" {{ old('os_version', $device->os_version) === 'Windows 11' ? 'selected' : '' }}>Windows 11</option>
+                    </select>
+                </div>
+
+                {{-- OS License --}}
+                <div id="show_os_license_wrapper" style="display:none;">
+                    <label class="text-sm font-medium">OS License</label>
+                    <select name="os_license" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2">
+                        <option value="">-- Select License --</option>
+                        <option value="Cracked" {{ old('os_license', $device->os_license) === 'Cracked' ? 'selected' : '' }}>Cracked</option>
+                        <option value="OEM Licensed" {{ old('os_license', $device->os_license) === 'OEM Licensed' ? 'selected' : '' }}>OEM Licensed</option>
+                    </select>
+                </div>
+
+                {{-- MS Office Version --}}
+                <div id="show_ms_version_wrapper" style="display:none;">
+                    <label class="text-sm font-medium">MS Office Version</label>
+                    <select name="ms_office_version" id="show_ms_version_select" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2">
+                        <option value="">-- Select MS Office --</option>
+                        <option value="Office 2007" {{ old('ms_office_version', $device->ms_office_version) === 'Office 2007' ? 'selected' : '' }}>Office 2007</option>
+                        <option value="Office 2010" {{ old('ms_office_version', $device->ms_office_version) === 'Office 2010' ? 'selected' : '' }}>Office 2010</option>
+                        <option value="Office 2013" {{ old('ms_office_version', $device->ms_office_version) === 'Office 2013' ? 'selected' : '' }}>Office 2013</option>
+                        <option value="Office 2016" {{ old('ms_office_version', $device->ms_office_version) === 'Office 2016' ? 'selected' : '' }}>Office 2016</option>
+                        <option value="Office 2019" {{ old('ms_office_version', $device->ms_office_version) === 'Office 2019' ? 'selected' : '' }}>Office 2019</option>
+                        <option value="Office 2021" {{ old('ms_office_version', $device->ms_office_version) === 'Office 2021' ? 'selected' : '' }}>Office 2021</option>
+                        <option value="Microsoft 365" {{ old('ms_office_version', $device->ms_office_version) === 'Microsoft 365' ? 'selected' : '' }}>Microsoft 365</option>
+                    </select>
+                </div>
+
+                {{-- MS Office License --}}
+                <div id="show_ms_license_wrapper" style="display:none;">
+                    <label class="text-sm font-medium">MS Office License</label>
+                    <select name="ms_office_license" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2">
+                        <option value="">-- Select License --</option>
+                        <option value="Cracked" {{ old('ms_office_license', $device->ms_office_license) === 'Cracked' ? 'selected' : '' }}>Cracked</option>
+                        <option value="OEM Licensed" {{ old('ms_office_license', $device->ms_office_license) === 'OEM Licensed' ? 'selected' : '' }}>OEM Licensed</option>
+                    </select>
+                </div>
+
 
                 <div>
                     <label class="text-sm font-medium">Unit Price</label>
@@ -486,4 +539,49 @@
         </form>
     </x-modal>
 </div>
+
+@push('scripts')
+<script>
+(function () {
+    var typeName = '{{ strtolower($device->type->name ?? '') }}';
+    var isComputer = typeName === 'desktop' || typeName === 'laptop';
+
+    var osVerSel  = document.getElementById('show_os_version_select');
+    var msVerSel  = document.getElementById('show_ms_version_select');
+    var osVerWrap = document.getElementById('show_os_version_wrapper');
+    var osLicWrap = document.getElementById('show_os_license_wrapper');
+    var msVerWrap = document.getElementById('show_ms_version_wrapper');
+    var msLicWrap = document.getElementById('show_ms_license_wrapper');
+
+    function show(el) { if (el) el.style.display = ''; }
+    function hide(el) { if (el) el.style.display = 'none'; }
+
+    function init() {
+        if (!isComputer) return;
+        show(osVerWrap);
+        show(msVerWrap);
+        if (osVerSel && osVerSel.value) show(osLicWrap); else hide(osLicWrap);
+        if (msVerSel && msVerSel.value) show(msLicWrap); else hide(msLicWrap);
+    }
+
+    if (osVerSel) {
+        osVerSel.addEventListener('change', function () {
+            this.value ? show(osLicWrap) : hide(osLicWrap);
+        });
+    }
+    if (msVerSel) {
+        msVerSel.addEventListener('change', function () {
+            this.value ? show(msLicWrap) : hide(msLicWrap);
+        });
+    }
+
+    // Re-init when quick edit panel opens
+    document.addEventListener('click', function () {
+        setTimeout(init, 150);
+    });
+
+    init();
+})();
+</script>
+@endpush
 @endsection

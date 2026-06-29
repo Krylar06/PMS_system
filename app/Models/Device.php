@@ -10,21 +10,25 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 class Device extends Model
 {
     protected $fillable = [
-    'device_type_id',
-    'property_number',
-    'serial_number',
-    'brand',
-    'model',
-    'mac_address',
-    'unit_price',
-    'date_acquired',
-    'status',
-    'condition',
-    'notes',
-    'specs',
-    'last_maintenance_date',
-    'maintenance_remarks',
-];
+        'device_type_id',
+        'property_number',
+        'serial_number',
+        'brand',
+        'model',
+        'mac_address',
+        'unit_price',
+        'date_acquired',
+        'status',
+        'condition',
+        'notes',
+        'specs',
+        'last_maintenance_date',
+        'maintenance_remarks',
+        'os_version',
+        'os_license',
+        'ms_office_version',
+        'ms_office_license',
+    ];
 
     protected $casts = [
         'specs' => 'array',

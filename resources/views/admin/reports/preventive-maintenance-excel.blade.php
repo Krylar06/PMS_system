@@ -123,7 +123,10 @@
             <th style="border: 1px solid #000000; background-color: #b4c6e7; font-weight: bold; text-align: center;">Serial #</th>
             <th style="border: 1px solid #000000; background-color: #b4c6e7; font-weight: bold; text-align: center;">Unit Price</th>
             <th style="border: 1px solid #000000; background-color: #b4c6e7; font-weight: bold; text-align: center;">MAC</th>
-            <th style="border: 1px solid #000000; background-color: #b4c6e7; font-weight: bold; text-align: center;">OS</th>
+            <th style="border: 1px solid #000000; background-color: #b4c6e7; font-weight: bold; text-align: center;">OS Version</th>
+            <th style="border: 1px solid #000000; background-color: #b4c6e7; font-weight: bold; text-align: center;">OS License</th>
+            <th style="border: 1px solid #000000; background-color: #b4c6e7; font-weight: bold; text-align: center;">MS Office Version</th>
+            <th style="border: 1px solid #000000; background-color: #b4c6e7; font-weight: bold; text-align: center;">MS Office License</th>
             <th style="border: 1px solid #000000; background-color: #b4c6e7; font-weight: bold; text-align: center;">Storage</th>
             <th style="border: 1px solid #000000; background-color: #b4c6e7; font-weight: bold; text-align: center;">Form Factor</th>
             <th style="border: 1px solid #000000; background-color: #b4c6e7; font-weight: bold; text-align: center;">Condition</th>
@@ -239,7 +242,10 @@
                     <td style="border: 1px solid #000000; text-align: center;">{{ $desktop?->serial_number ?? '' }}</td>
                     <td style="border: 1px solid #000000; text-align: center;">{{ $priceValue($desktop) }}</td>
                     <td style="border: 1px solid #000000; text-align: center;">{{ $desktop?->mac_address ?? '' }}</td>
-                    <td style="border: 1px solid #000000; text-align: center;">{{ data_get($desktop?->specs, 'os', '') }}</td>
+                    <td style="border: 1px solid #000000; text-align: center;">{{ $desktop?->device?->os_version ?? '' }}</td>
+                    <td style="border: 1px solid #000000; text-align: center;">{{ $desktop?->device?->os_license ?? '' }}</td>
+                    <td style="border: 1px solid #000000; text-align: center;">{{ $desktop?->device?->ms_office_version ?? '' }}</td>
+                    <td style="border: 1px solid #000000; text-align: center;">{{ $desktop?->device?->ms_office_license ?? '' }}</td>
                     <td style="border: 1px solid #000000; text-align: center;">{{ data_get($desktop?->specs, 'storage', '') }}</td>
                     <td style="border: 1px solid #000000; text-align: center;">{{ data_get($desktop?->specs, 'form_factor', '') }}</td>
                     <td style="border: 1px solid #000000; text-align: center;">{{ $conditionValue($desktop) }}</td>

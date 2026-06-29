@@ -222,12 +222,7 @@
                                 </div>
                             </div>
 
-                            <div>
-                                <div class="text-gray-500">Operating System</div>
-                                <div class="text-gray-900">
-                                    {{ data_get($d->specs, 'os', '-') ?: '-' }}
-                                </div>
-                            </div>
+
 
                             <div>
                                 <div class="text-gray-500">Memory</div>
@@ -574,17 +569,6 @@
                     >
                 </div>
 
-                <div x-show="isComputerType(addTypeId)" x-cloak>
-                    <label class="text-sm font-medium">Operating System</label>
-                    <input
-                        name="specs[os]"
-                        value="{{ old('specs.os') }}"
-                        class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
-                        maxlength="100"
-                        placeholder="Example: Windows 10, Windows 11, Ubuntu"
-                        :disabled="!isComputerType(addTypeId)"
-                    >
-                </div>
 
                 <div x-show="isComputerType(addTypeId)" x-cloak>
                     <label class="text-sm font-medium">Memory</label>
@@ -620,6 +604,53 @@
                         placeholder="Example: Tower, SFF, Mini PC, All-in-One"
                         :disabled="!isComputerType(addTypeId)"
                     >
+                </div>
+
+                {{-- OS Version --}}
+                <div id="add_os_version_wrapper" style="display:none;">
+                    <label class="text-sm font-medium">OS Version</label>
+                    <select name="os_version" id="add_os_version_select" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2">
+                        <option value="">-- Select OS --</option>
+                        <option value="Windows 7">Windows 7</option>
+                        <option value="Windows 8">Windows 8</option>
+                        <option value="Windows 10">Windows 10</option>
+                        <option value="Windows 11">Windows 11</option>
+                    </select>
+                </div>
+
+                {{-- OS License --}}
+                <div id="add_os_license_wrapper" style="display:none;">
+                    <label class="text-sm font-medium">OS License</label>
+                    <select name="os_license" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2">
+                        <option value="">-- Select License --</option>
+                        <option value="Cracked">Cracked</option>
+                        <option value="OEM Licensed">OEM Licensed</option>
+                    </select>
+                </div>
+
+                {{-- MS Office Version --}}
+                <div id="add_ms_version_wrapper" style="display:none;">
+                    <label class="text-sm font-medium">MS Office Version</label>
+                    <select name="ms_office_version" id="add_ms_version_select" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2">
+                        <option value="">-- Select MS Office --</option>
+                        <option value="Office 2007">Office 2007</option>
+                        <option value="Office 2010">Office 2010</option>
+                        <option value="Office 2013">Office 2013</option>
+                        <option value="Office 2016">Office 2016</option>
+                        <option value="Office 2019">Office 2019</option>
+                        <option value="Office 2021">Office 2021</option>
+                        <option value="Microsoft 365">Microsoft 365</option>
+                    </select>
+                </div>
+
+                {{-- MS Office License --}}
+                <div id="add_ms_license_wrapper" style="display:none;">
+                    <label class="text-sm font-medium">MS Office License</label>
+                    <select name="ms_office_license" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2">
+                        <option value="">-- Select License --</option>
+                        <option value="Cracked">Cracked</option>
+                        <option value="OEM Licensed">OEM Licensed</option>
+                    </select>
                 </div>
 
                 <div>
@@ -805,18 +836,6 @@
                 </div>
 
                 <div x-show="isComputerType(editDevice.device_type_id)" x-cloak>
-                    <label class="text-sm font-medium">Operating System</label>
-                    <input
-                        name="specs[os]"
-                        class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
-                        x-model="editDevice.specs.os"
-                        maxlength="100"
-                        placeholder="Example: Windows 10, Windows 11, Ubuntu"
-                        :disabled="!isComputerType(editDevice.device_type_id)"
-                    >
-                </div>
-
-                <div x-show="isComputerType(editDevice.device_type_id)" x-cloak>
                     <label class="text-sm font-medium">Memory</label>
                     <input
                         name="specs[memory]"
@@ -850,6 +869,53 @@
                         placeholder="Example: Tower, SFF, Mini PC, All-in-One"
                         :disabled="!isComputerType(editDevice.device_type_id)"
                     >
+                </div>
+
+                {{-- OS Version --}}
+                <div id="edit_os_version_wrapper" style="display:none;">
+                    <label class="text-sm font-medium">OS Version</label>
+                    <select name="os_version" id="edit_os_version_select" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2">
+                        <option value="">-- Select OS --</option>
+                        <option value="Windows 7">Windows 7</option>
+                        <option value="Windows 8">Windows 8</option>
+                        <option value="Windows 10">Windows 10</option>
+                        <option value="Windows 11">Windows 11</option>
+                    </select>
+                </div>
+
+                {{-- OS License --}}
+                <div id="edit_os_license_wrapper" style="display:none;">
+                    <label class="text-sm font-medium">OS License</label>
+                    <select name="os_license" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2">
+                        <option value="">-- Select License --</option>
+                        <option value="Cracked">Cracked</option>
+                        <option value="OEM Licensed">OEM Licensed</option>
+                    </select>
+                </div>
+
+                {{-- MS Office Version --}}
+                <div id="edit_ms_version_wrapper" style="display:none;">
+                    <label class="text-sm font-medium">MS Office Version</label>
+                    <select name="ms_office_version" id="edit_ms_version_select" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2">
+                        <option value="">-- Select MS Office --</option>
+                        <option value="Office 2007">Office 2007</option>
+                        <option value="Office 2010">Office 2010</option>
+                        <option value="Office 2013">Office 2013</option>
+                        <option value="Office 2016">Office 2016</option>
+                        <option value="Office 2019">Office 2019</option>
+                        <option value="Office 2021">Office 2021</option>
+                        <option value="Microsoft 365">Microsoft 365</option>
+                    </select>
+                </div>
+
+                {{-- MS Office License --}}
+                <div id="edit_ms_license_wrapper" style="display:none;">
+                    <label class="text-sm font-medium">MS Office License</label>
+                    <select name="ms_office_license" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2">
+                        <option value="">-- Select License --</option>
+                        <option value="Cracked">Cracked</option>
+                        <option value="OEM Licensed">OEM Licensed</option>
+                    </select>
                 </div>
 
                 <div>
@@ -976,4 +1042,104 @@
         </div>
     </x-modal>
 </div>
+@push('scripts')
+<script>
+(function () {
+    // ── ADD MODAL ──────────────────────────────────────────────
+    var typeNames = @json($types->pluck('name', 'id'));
+
+    function getTypeName(typeId) {
+        return (typeNames[typeId] || '').toLowerCase();
+    }
+
+    function isComputer(typeId) {
+        var name = getTypeName(typeId);
+        return name === 'desktop' || name === 'laptop';
+    }
+
+    function show(el) { if (el) el.style.display = ''; }
+    function hide(el) { if (el) el.style.display = 'none'; }
+
+    // --- ADD modal ---
+    var addTypeSelect    = document.querySelector('[x-model="addTypeId"]');
+    var addOsVerSel      = document.getElementById('add_os_version_select');
+    var addMsVerSel      = document.getElementById('add_ms_version_select');
+    var addOsVerWrap     = document.getElementById('add_os_version_wrapper');
+    var addOsLicWrap     = document.getElementById('add_os_license_wrapper');
+    var addMsVerWrap     = document.getElementById('add_ms_version_wrapper');
+    var addMsLicWrap     = document.getElementById('add_ms_license_wrapper');
+
+    function updateAddFields() {
+        var typeId = addTypeSelect ? addTypeSelect.value : '';
+        var computer = isComputer(typeId);
+        computer ? show(addOsVerWrap) : hide(addOsVerWrap);
+        computer ? show(addMsVerWrap) : hide(addMsVerWrap);
+        if (computer && addOsVerSel && addOsVerSel.value) { show(addOsLicWrap); } else { hide(addOsLicWrap); }
+        if (computer && addMsVerSel && addMsVerSel.value) { show(addMsLicWrap); } else { hide(addMsLicWrap); }
+    }
+
+    if (addTypeSelect) {
+        addTypeSelect.addEventListener('change', updateAddFields);
+        // Also watch via MutationObserver since Alpine controls the value
+        new MutationObserver(updateAddFields).observe(addTypeSelect, { attributes: true, childList: true, subtree: true });
+    }
+    if (addOsVerSel) {
+        addOsVerSel.addEventListener('change', function () {
+            this.value ? show(addOsLicWrap) : hide(addOsLicWrap);
+        });
+    }
+    if (addMsVerSel) {
+        addMsVerSel.addEventListener('change', function () {
+            this.value ? show(addMsLicWrap) : hide(addMsLicWrap);
+        });
+    }
+
+    // --- EDIT modal ---
+    var editTypeSelect   = document.querySelector('[x-model="editDevice.device_type_id"]');
+    var editOsVerSel     = document.getElementById('edit_os_version_select');
+    var editMsVerSel     = document.getElementById('edit_ms_version_select');
+    var editOsVerWrap    = document.getElementById('edit_os_version_wrapper');
+    var editOsLicWrap    = document.getElementById('edit_os_license_wrapper');
+    var editMsVerWrap    = document.getElementById('edit_ms_version_wrapper');
+    var editMsLicWrap    = document.getElementById('edit_ms_license_wrapper');
+
+    function updateEditFields() {
+        var typeId = editTypeSelect ? editTypeSelect.value : '';
+        var computer = isComputer(typeId);
+        computer ? show(editOsVerWrap) : hide(editOsVerWrap);
+        computer ? show(editMsVerWrap) : hide(editMsVerWrap);
+        if (computer && editOsVerSel && editOsVerSel.value) { show(editOsLicWrap); } else { hide(editOsLicWrap); }
+        if (computer && editMsVerSel && editMsVerSel.value) { show(editMsLicWrap); } else { hide(editMsLicWrap); }
+    }
+
+    if (editTypeSelect) {
+        editTypeSelect.addEventListener('change', updateEditFields);
+        new MutationObserver(updateEditFields).observe(editTypeSelect, { attributes: true, childList: true, subtree: true });
+    }
+    if (editOsVerSel) {
+        editOsVerSel.addEventListener('change', function () {
+            this.value ? show(editOsLicWrap) : hide(editOsLicWrap);
+        });
+    }
+    if (editMsVerSel) {
+        editMsVerSel.addEventListener('change', function () {
+            this.value ? show(editMsLicWrap) : hide(editMsLicWrap);
+        });
+    }
+
+    // Run on load
+    updateAddFields();
+    updateEditFields();
+
+    // Re-run when modals open (Alpine toggles visibility)
+    document.addEventListener('click', function () {
+        setTimeout(function () {
+            updateAddFields();
+            updateEditFields();
+        }, 100);
+    });
+})();
+</script>
+@endpush
 @endsection
+

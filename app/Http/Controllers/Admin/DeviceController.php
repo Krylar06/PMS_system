@@ -88,9 +88,6 @@ class DeviceController extends Controller
         |--------------------------------------------------------------------------
         | Default Device Condition
         |--------------------------------------------------------------------------
-        | Device condition is separate from availability.
-        | condition = serviceable / unserviceable
-        | status = available / issued / repair / retired
         */
         $data['condition'] = $data['condition'] ?? 'serviceable';
 
@@ -131,12 +128,10 @@ class DeviceController extends Controller
     {
         $data = $request->validated();
 
-        /*
+        /*6666666666666666666666666666666
         |--------------------------------------------------------------------------
         | Keep existing status if not submitted
         |--------------------------------------------------------------------------
-        | This prevents accidentally changing issued/available status from forms
-        | that do not include a status field.
         */
         if (! array_key_exists('status', $data)) {
             unset($data['status']);
@@ -200,10 +195,14 @@ class DeviceController extends Controller
             'notes' => ['nullable', 'string', 'max:2000'],
 
             'specs' => ['nullable', 'array'],
-            'specs.os' => ['nullable', 'string', 'max:100'],
-            'specs.memory' => ['nullable', 'string', 'max:50'],
-            'specs.storage' => ['nullable', 'string', 'max:50'],
-            'specs.form_factor' => ['nullable', 'string', 'max:50'],
+            'specs.memory'      => ['nullable', 'string', 'max:255'],
+            'specs.storage'     => ['nullable', 'string', 'max:255'],
+            'specs.form_factor' => ['nullable', 'string', 'max:255'],
+
+            'os_version'        => ['nullable', 'string', 'in:Windows 7,Windows 8,Windows 10,Windows 11'],
+            'os_license'        => ['nullable', 'string', 'in:Cracked,OEM Licensed'],
+            'ms_office_version' => ['nullable', 'string', 'in:Office 2007,Office 2010,Office 2013,Office 2016,Office 2019,Office 2021,Microsoft 365'],
+            'ms_office_license' => ['nullable', 'string', 'in:Cracked,OEM Licensed'],
         ], [
             'property_number.regex' => 'Property number may only contain letters, numbers, hyphens, and slashes.',
             'serial_number.regex' => 'Serial number may only contain letters, numbers, and hyphens.',
@@ -214,11 +213,6 @@ class DeviceController extends Controller
             'last_maintenance_date.before_or_equal' => 'Last maintenance date cannot be in the future.',
         ]);
 
-        /*
-        |--------------------------------------------------------------------------
-        | If device_type_id is not submitted, use the current device type.
-        |--------------------------------------------------------------------------
-        */
         $data['device_type_id'] = $data['device_type_id'] ?? $device->device_type_id;
         $data['condition'] = $data['condition'] ?? $device->condition ?? 'serviceable';
 
@@ -237,33 +231,32 @@ class DeviceController extends Controller
 
     /**
      * Mark the device as checked/maintained today.
-     * This also creates a maintenance history record.
      */
     public function markChecked(Request $request, Device $device)
     {
         $data = $request->validate([
             'maintenance_date' => ['nullable', 'date', 'before_or_equal:today'],
             'maintenance_type' => ['nullable', 'string', 'max:100'],
-            'remarks' => ['nullable', 'string', 'max:1000'],
+            'remarks'          => ['nullable', 'string', 'max:1000'],
         ], [
             'maintenance_date.before_or_equal' => 'Maintenance date cannot be in the future.',
         ]);
 
         $maintenanceDate = $data['maintenance_date'] ?? now()->toDateString();
         $maintenanceType = $data['maintenance_type'] ?? 'Checked';
-        $remarks = $data['remarks'] ?? 'Checked/Maintained today';
+        $remarks         = $data['remarks'] ?? 'Checked/Maintained today';
 
         DeviceMaintenanceRecord::create([
-            'device_id' => $device->id,
+            'device_id'        => $device->id,
             'maintenance_date' => $maintenanceDate,
             'maintenance_type' => $maintenanceType,
-            'remarks' => $remarks,
-            'checked_by' => Auth::id(),
+            'remarks'          => $remarks,
+            'checked_by'       => Auth::id(),
         ]);
 
         $device->update([
             'last_maintenance_date' => $maintenanceDate,
-            'maintenance_remarks' => $remarks,
+            'maintenance_remarks'   => $remarks,
         ]);
 
         ActivityLog::record('updated', "Marked device \"{$device->property_number}\" as checked/maintained", $device);
@@ -328,21 +321,24 @@ class DeviceController extends Controller
      */
     private function cleanDeviceDataByType(array $data): array
     {
-        $type = DeviceType::find($data['device_type_id'] ?? null);
+        $type     = DeviceType::find($data['device_type_id'] ?? null);
         $typeName = strtolower($type?->name ?? '');
 
         $isComputerType = in_array($typeName, ['desktop', 'laptop']);
 
         if (! $isComputerType) {
+            // Clear MAC address for non-computers
             $data['mac_address'] = null;
 
+            // Clear OS & MS Office columns
+            $data['os_version']        = null;
+            $data['os_license']        = null;
+            $data['ms_office_version'] = null;
+            $data['ms_office_license'] = null;
+
+            // Clear computer-specific specs
             $data['specs'] = collect($data['specs'] ?? [])
-                ->except([
-                    'os',
-                    'memory',
-                    'storage',
-                    'form_factor',
-                ])
+                ->except(['memory', 'storage', 'form_factor'])
                 ->toArray();
 
             if (empty($data['specs'])) {
@@ -365,7 +361,6 @@ class DeviceController extends Controller
 
     /**
      * Only show these device types in the Add/Edit dropdown.
-     * This does not delete old device types from the database.
      */
     private function allowedDeviceTypes()
     {
