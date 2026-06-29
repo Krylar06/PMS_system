@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>PMS System – Login</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css', 'resources/js/app.js']); ?>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
@@ -402,16 +402,16 @@
             <h2>Welcome Back</h2>
             <p class="subtitle">Sign in to continue to PMAMS</p>
 
-            @if (session('status'))
-                <div class="alert-success">{{ session('status') }}</div>
-            @endif
+            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(session('status')): ?>
+                <div class="alert-success"><?php echo e(session('status')); ?></div>
+            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
-            @if ($errors->any())
-                <div class="alert-error">{{ $errors->first() }}</div>
-            @endif
+            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($errors->any()): ?>
+                <div class="alert-error"><?php echo e($errors->first()); ?></div>
+            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
-            <form method="POST" action="{{ route('login.submit') }}">
-                @csrf
+            <form method="POST" action="<?php echo e(route('login.submit')); ?>">
+                <?php echo csrf_field(); ?>
 
                 <div class="field">
                     <label for="email">Email</label>
@@ -422,7 +422,7 @@
                                       d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                             </svg>
                         </span>
-                        <input id="email" name="email" type="email" value="{{ old('email') }}" placeholder="Email" required autofocus>
+                        <input id="email" name="email" type="email" value="<?php echo e(old('email')); ?>" placeholder="Email" required autofocus>
                     </div>
                 </div>
 
@@ -450,7 +450,7 @@
                         <input type="checkbox" name="remember" checked>
                         Remember me
                     </label>
-                    <a href="{{ route('password.request') }}" class="forgot">Forgot password?</a>
+                    <a href="<?php echo e(route('password.request')); ?>" class="forgot">Forgot password?</a>
                 </div>
 
                 <button type="submit" class="btn-login">
@@ -465,4 +465,4 @@
     </div><!-- /right-panel -->
 
 </body>
-</html>
+</html><?php /**PATH C:\xampp\htdocs\pms-system\resources\views/auth/login.blade.php ENDPATH**/ ?>
