@@ -312,17 +312,14 @@
                             History
                         </a>
 
-                        <form method="POST" action="{{ route('admin.devices.markChecked', $d) }}">
-                            @csrf
-                            @method('PATCH')
-
-                            <button
-                                type="submit"
-                                class="rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
-                            >
-                                Mark Checked
-                            </button>
-                        </form>
+                        <a
+                            href="{{ route('admin.devices.checklist.create', $d) }}"
+                            target="_blank"
+                            rel="noopener"
+                            class="rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
+                        >
+                            Mark Checked
+                        </a>
 
                         <button
                             type="button"
@@ -446,17 +443,14 @@
                                         History
                                     </a>
 
-                                    <form method="POST" action="{{ route('admin.devices.markChecked', $d) }}">
-                                        @csrf
-                                        @method('PATCH')
-
-                                        <button
-                                            type="submit"
-                                            class="rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
-                                        >
-                                            Mark Checked
-                                        </button>
-                                    </form>
+                                    <a
+                                        href="{{ route('admin.devices.checklist.create', $d) }}"
+                                        target="_blank"
+                                        rel="noopener"
+                                        class="rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
+                                    >
+                                        Mark Checked
+                                    </a>
 
                                     <button
                                         type="button"

@@ -25,8 +25,37 @@
             let name = this.getTypeName(selected);
 
             return name === 'desktop' || name === 'laptop';
+        },
+
+        isDesktopType(typeId = null) {
+            let selected = typeId ?? this.selectedTypeId;
+            return this.getTypeName(selected) === 'desktop';
+        },
+
+        formatUnitPriceValue(value) {
+            value = String(value ?? '').replace(/[^0-9.]/g, '');
+
+            let parts = value.split('.');
+            let whole = parts.shift() || '';
+            let decimals = parts.length ? '.' + parts.join('').slice(0, 2) : '';
+
+            whole = whole.replace(/^0+(?=\d)/, '');
+            whole = whole.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+            return whole + decimals;
+        },
+
+        formatUnitPriceInput(event) {
+            event.target.value = this.formatUnitPriceValue(event.target.value);
+        },
+
+        cleanUnitPrices(form) {
+            form.querySelectorAll('.unit-price-input').forEach((input) => {
+                input.value = String(input.value ?? '').replace(/,/g, '');
+            });
         }
     }"
+    x-init="$nextTick(() => $el.querySelectorAll('.unit-price-input').forEach((input) => input.value = formatUnitPriceValue(input.value)))"
     class="grid grid-cols-1 gap-6 lg:grid-cols-3"
 >
     <div class="lg:col-span-2">
@@ -57,25 +86,18 @@
                         History
                     </a>
 
-                    <form
-                        method="POST"
-                        action="{{ route('admin.devices.markChecked', $device) }}"
-                        onsubmit="return confirm('Mark this device as checked/maintained today?')"
+                    <a
+                        href="{{ route('admin.devices.checklist.create', $device) }}"
+                        target="_blank"
+                        rel="noopener"
+                        class="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
                     >
-                        @csrf
-                        @method('PATCH')
-
-                        <button
-                            type="submit"
-                            class="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
-                        >
-                            Mark as Checked
-                        </button>
-                    </form>
+                        Mark as Checked
+                    </a>
 
                     <button
                         type="button"
-                        x-on:click="editOpen = true"
+                        x-on:click.prevent.stop="editOpen = true"
                         class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
                     >
                         Edit
@@ -166,12 +188,14 @@
                         </div>
                     </div>
 
-                    <div>
-                        <div class="text-sm text-gray-500">Form Factor</div>
-                        <div class="font-medium text-gray-900">
-                            {{ data_get($device->specs, 'form_factor', '-') ?: '-' }}
+                    @if($deviceTypeName === 'desktop')
+                        <div>
+                            <div class="text-sm text-gray-500">Form Factor</div>
+                            <div class="font-medium text-gray-900">
+                                {{ data_get($device->specs, 'form_factor', '-') ?: '-' }}
+                            </div>
                         </div>
-                    </div>
+                    @endif
                     <div>
                         <div class="text-sm text-gray-500">OS Version</div>
                         <div class="font-medium text-gray-900">{{ $device->os_version ?: '-' }}</div>
@@ -284,13 +308,35 @@
     </div>
 
     {{-- EDIT MODAL --}}
-    <x-modal show="editOpen" title="Edit Device">
-        <form method="POST" action="{{ route('admin.devices.update', $device) }}" class="space-y-4">
+    <div
+        x-show="editOpen"
+        x-cloak
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
+    >
+        <div
+            x-show="editOpen"
+            x-transition
+            @click.away="editOpen = false"
+            class="w-full max-w-4xl overflow-hidden rounded-2xl bg-white shadow-xl"
+        >
+            <div class="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+                <h2 class="text-lg font-semibold text-gray-900">Edit Device</h2>
+                <button
+                    type="button"
+                    x-on:click="editOpen = false"
+                    class="rounded-lg px-3 py-1 text-xl text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+                >
+                    &times;
+                </button>
+            </div>
+
+            <form method="POST" action="{{ route('admin.devices.update', $device) }}" class="space-y-4" x-on:submit="cleanUnitPrices($event.target)">
             @csrf
             @method('PUT')
 
             <input type="hidden" name="status" value="{{ $device->status ?? 'available' }}">
 
+            <div class="max-h-[75vh] overflow-y-auto px-6 py-5">
             <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
                 <div>
                     <label class="text-sm font-medium">Device Type</label>
@@ -409,15 +455,20 @@
                     >
                 </div>
 
-                <div x-show="isComputerType()" x-cloak>
+                <div x-show="isDesktopType()" x-cloak>
                     <label class="text-sm font-medium">Form Factor</label>
-                    <input
+                    <select
                         name="specs[form_factor]"
-                        value="{{ old('specs.form_factor', data_get($device->specs, 'form_factor')) }}"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
-                        maxlength="50"
-                        :disabled="!isComputerType()"
+                        :disabled="!isDesktopType()"
                     >
+                        <option value="">-- Select Form Factor --</option>
+                        <option value="Tower Desktops" @selected(old('specs.form_factor', data_get($device->specs, 'form_factor')) === 'Tower Desktops')>Tower Desktops</option>
+                        <option value="Small Form Factor (SFF) Desktops" @selected(old('specs.form_factor', data_get($device->specs, 'form_factor')) === 'Small Form Factor (SFF) Desktops')>Small Form Factor (SFF) Desktops</option>
+                        <option value="All-in-One (AIO) Desktops" @selected(old('specs.form_factor', data_get($device->specs, 'form_factor')) === 'All-in-One (AIO) Desktops')>All-in-One (AIO) Desktops</option>
+                        <option value="Mini PCs" @selected(old('specs.form_factor', data_get($device->specs, 'form_factor')) === 'Mini PCs')>Mini PCs</option>
+                        <option value="Workstations" @selected(old('specs.form_factor', data_get($device->specs, 'form_factor')) === 'Workstations')>Workstations</option>
+                    </select>
                 </div>
 
                 {{-- OS Version --}}
@@ -472,12 +523,12 @@
                     <label class="text-sm font-medium">Unit Price</label>
                     <input
                         name="unit_price"
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        max="9999999999.99"
+                        type="text"
+                        inputmode="decimal"
                         value="{{ old('unit_price', $device->unit_price) }}"
-                        class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                        placeholder="e.g. 25,000.00"
+                        class="unit-price-input mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                        x-on:input="formatUnitPriceInput($event)"
                     >
                 </div>
 
@@ -540,7 +591,9 @@
                 >{{ old('notes', $device->notes) }}</textarea>
             </div>
 
-            <div class="flex justify-end gap-2 pt-2">
+            </div>
+
+            <div class="flex justify-end gap-2 border-t border-gray-200 px-6 py-4">
                 <button
                     type="button"
                     x-on:click="editOpen = false"
@@ -556,14 +609,15 @@
                     Save Changes
                 </button>
             </div>
-        </form>
-    </x-modal>
+            </form>
+        </div>
+    </div>
 </div>
 
 @push('scripts')
 <script>
 (function () {
-    var typeName = '{{ strtolower($device->type->name ?? '') }}';
+    var typeName = @json(strtolower($device->type?->name ?? ''));
     var isComputer = typeName === 'desktop' || typeName === 'laptop';
 
     var osVerSel  = document.getElementById('show_os_version_select');

@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\ReportController;
+use App\Http\Controllers\Admin\DeviceChecklistController;
 
 /*
 |--------------------------------------------------------------------------
@@ -106,6 +107,12 @@ Route::middleware(['auth', 'role:admin,custodian'])->group(function () {
 
         Route::patch('/devices/{device}/mark-checked', [DeviceController::class, 'markChecked'])
             ->name('admin.devices.markChecked');
+
+        Route::get('/devices/{device}/maintenance-checklist', [DeviceChecklistController::class, 'create'])
+            ->name('admin.devices.checklist.create');
+
+        Route::post('/devices/{device}/maintenance-checklist/pdf', [DeviceChecklistController::class, 'generate'])
+            ->name('admin.devices.checklist.generate');
 
         Route::get('/devices/{device}/maintenance-history', [DeviceController::class, 'maintenanceHistory'])
             ->name('admin.devices.history');
