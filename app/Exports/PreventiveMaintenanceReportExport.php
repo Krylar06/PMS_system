@@ -126,18 +126,18 @@ class PreventiveMaintenanceReportExport implements FromView, WithEvents
                 | General Styling
                 |--------------------------------------------------------------------------
                 */
-                $sheet->getStyle("A1:AR{$highestRow}")
+                $sheet->getStyle("A1:AS{$highestRow}")
                     ->getAlignment()
                     ->setVertical(Alignment::VERTICAL_CENTER)
                     ->setHorizontal(Alignment::HORIZONTAL_CENTER)
                     ->setWrapText(true);
 
-                $sheet->getStyle("A1:AR{$highestRow}")
+                $sheet->getStyle("A1:AS{$highestRow}")
                     ->getBorders()
                     ->getAllBorders()
                     ->setBorderStyle(Border::BORDER_THIN);
 
-                $sheet->getStyle('A1:AR5')
+                $sheet->getStyle('A1:AS5')
                     ->getFont()
                     ->setBold(true);
 
@@ -168,58 +168,59 @@ class PreventiveMaintenanceReportExport implements FromView, WithEvents
                     'B' => 8,   // No.
                     'C' => 22,  // Office
 
-                    // Desktop: D to O
+                    // Desktop: D to P
                     'D' => 20,  // Name / Model
                     'E' => 14,  // Brand
                     'F' => 24,  // Issued To
                     'G' => 14,  // Acquired
                     'H' => 24,  // Property #
                     'I' => 22,  // Serial #
-                    'J' => 14,  // Unit Price
-                    'K' => 22,  // MAC
-                    'L' => 18,  // OS
-                    'M' => 18,  // Storage
-                    'N' => 18,  // Form Factor
-                    'O' => 16,  // Condition
+                    'J' => 20,  // Computer Name
+                    'K' => 14,  // Unit Price
+                    'L' => 22,  // MAC
+                    'M' => 18,  // OS
+                    'N' => 18,  // Storage
+                    'O' => 18,  // Form Factor
+                    'P' => 16,  // Condition
 
-                    // Monitor: P to V
-                    'P' => 22,  // Brand / Model
-                    'Q' => 24,  // Issued To
-                    'R' => 14,  // Acquired
-                    'S' => 24,  // Property #
-                    'T' => 22,  // Serial #
-                    'U' => 14,  // Unit Price
-                    'V' => 16,  // Condition
+                    // Monitor: Q to W
+                    'Q' => 22,  // Brand / Model
+                    'R' => 24,  // Issued To
+                    'S' => 14,  // Acquired
+                    'T' => 24,  // Property #
+                    'U' => 22,  // Serial #
+                    'V' => 14,  // Unit Price
+                    'W' => 16,  // Condition
 
-                    // Printer: W to AC
-                    'W' => 22,  // Brand / Model
-                    'X' => 24,  // Issued To
-                    'Y' => 14,  // Acquired
-                    'Z' => 24,  // Property #
-                    'AA' => 22, // Serial #
-                    'AB' => 14, // Unit Price
-                    'AC' => 16, // Condition
+                    // Printer: X to AD
+                    'X' => 22, // Brand / Model
+                    'Y' => 24, // Issued To
+                    'Z' => 14, // Acquired
+                    'AA' => 24, // Property #
+                    'AB' => 22, // Serial #
+                    'AC' => 14, // Unit Price
+                    'AD' => 16, // Condition
 
-                    // UPS: AD to AJ
-                    'AD' => 22, // Brand / Model
-                    'AE' => 24, // Issued To
-                    'AF' => 14, // Acquired
-                    'AG' => 24, // Property #
-                    'AH' => 22, // Serial #
-                    'AI' => 14, // Unit Price
-                    'AJ' => 16, // Condition
+                    // UPS: AE to AK
+                    'AE' => 22, // Brand / Model
+                    'AF' => 24, // Issued To
+                    'AG' => 14, // Acquired
+                    'AH' => 24, // Property #
+                    'AI' => 22, // Serial #
+                    'AJ' => 14, // Unit Price
+                    'AK' => 16, // Condition
 
-                    // AVR: AK to AQ
-                    'AK' => 22, // Brand / Model
-                    'AL' => 24, // Issued To
-                    'AM' => 14, // Acquired
-                    'AN' => 24, // Property #
-                    'AO' => 22, // Serial #
-                    'AP' => 14, // Unit Price
-                    'AQ' => 16, // Condition
+                    // AVR: AL to AR
+                    'AL' => 22, // Brand / Model
+                    'AM' => 24, // Issued To
+                    'AN' => 14, // Acquired
+                    'AO' => 24, // Property #
+                    'AP' => 22, // Serial #
+                    'AQ' => 14, // Unit Price
+                    'AR' => 16, // Condition
 
                     // Remarks
-                    'AR' => 36,
+                    'AS' => 36,
                 ];
 
                 foreach ($widths as $column => $width) {
@@ -235,11 +236,11 @@ class PreventiveMaintenanceReportExport implements FromView, WithEvents
                 | converted by Excel.
                 */
                 $textColumns = [
-                    'H', 'I', 'K',
-                    'S', 'T',
-                    'Z', 'AA',
-                    'AG', 'AH',
-                    'AN', 'AO',
+                    'H', 'I', 'L',
+                    'T', 'U',
+                    'AA', 'AB',
+                    'AH', 'AI',
+                    'AO', 'AP',
                 ];
 
                 foreach ($textColumns as $column) {
@@ -258,12 +259,12 @@ class PreventiveMaintenanceReportExport implements FromView, WithEvents
                 | Better visual formatting
                 |--------------------------------------------------------------------------
                 */
-                $sheet->getStyle("A4:AR5")
+                $sheet->getStyle("A4:AS5")
                     ->getAlignment()
                     ->setWrapText(true)
                     ->setShrinkToFit(false);
 
-                $sheet->getStyle("A6:AR{$highestRow}")
+                $sheet->getStyle("A6:AS{$highestRow}")
                     ->getAlignment()
                     ->setWrapText(true)
                     ->setShrinkToFit(false);
@@ -273,7 +274,7 @@ class PreventiveMaintenanceReportExport implements FromView, WithEvents
                 | Hide extra columns after AR if Excel shows blank space
                 |--------------------------------------------------------------------------
                 */
-                foreach (range('AS', 'AZ') as $column) {
+                foreach (range('AT', 'BA') as $column) {
                     $sheet->getColumnDimension($column)->setVisible(false);
                 }
             },

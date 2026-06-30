@@ -4,13 +4,14 @@
         <col style="width: 8px;">  {{-- B No --}}
         <col style="width: 22px;"> {{-- C Office --}}
 
-        {{-- Desktop D-O --}}
+        {{-- Desktop D-P --}}
         <col style="width: 18px;">
         <col style="width: 14px;">
         <col style="width: 22px;">
         <col style="width: 14px;">
         <col style="width: 24px;">
         <col style="width: 20px;">
+        <col style="width: 20px;"> {{-- Computer Name --}}
         <col style="width: 14px;">
         <col style="width: 20px;">
         <col style="width: 16px;">
@@ -18,16 +19,7 @@
         <col style="width: 16px;">
         <col style="width: 16px;">
 
-        {{-- Monitor P-V --}}
-        <col style="width: 18px;">
-        <col style="width: 22px;">
-        <col style="width: 14px;">
-        <col style="width: 24px;">
-        <col style="width: 20px;">
-        <col style="width: 14px;">
-        <col style="width: 16px;">
-
-        {{-- Printer W-AC --}}
+        {{-- Monitor Q-W --}}
         <col style="width: 18px;">
         <col style="width: 22px;">
         <col style="width: 14px;">
@@ -36,7 +28,7 @@
         <col style="width: 14px;">
         <col style="width: 16px;">
 
-        {{-- UPS AD-AJ --}}
+        {{-- Printer X-AD --}}
         <col style="width: 18px;">
         <col style="width: 22px;">
         <col style="width: 14px;">
@@ -45,7 +37,7 @@
         <col style="width: 14px;">
         <col style="width: 16px;">
 
-        {{-- AVR AK-AQ --}}
+        {{-- UPS AE-AK --}}
         <col style="width: 18px;">
         <col style="width: 22px;">
         <col style="width: 14px;">
@@ -54,24 +46,33 @@
         <col style="width: 14px;">
         <col style="width: 16px;">
 
-        {{-- AR Remarks --}}
+        {{-- AVR AL-AR --}}
+        <col style="width: 18px;">
+        <col style="width: 22px;">
+        <col style="width: 14px;">
+        <col style="width: 24px;">
+        <col style="width: 20px;">
+        <col style="width: 14px;">
+        <col style="width: 16px;">
+
+        {{-- AS Remarks --}}
         <col style="width: 34px;">
     </colgroup>
 
     <tr>
-        <td colspan="44" style="font-weight: bold; font-size: 14px; text-align: center;">
+        <td colspan="45" style="font-weight: bold; font-size: 14px; text-align: center;">
             DESKTOP COMPUTERS AND PERIPHERALS COVERED DURING PREVENTIVE MAINTENANCE
         </td>
     </tr>
 
     <tr>
-        <td colspan="44" style="font-weight: bold; font-size: 12px; text-align: center;">
+        <td colspan="45" style="font-weight: bold; font-size: 12px; text-align: center;">
             Exported Date: {{ $reportDate->format('F d, Y') }}
         </td>
     </tr>
 
     <tr>
-        <td colspan="44"></td>
+        <td colspan="45"></td>
     </tr>
 
     <thead>
@@ -88,7 +89,7 @@
                 Office
             </th>
 
-            <th colspan="12" style="border: 1px solid #000000; background-color: #b4c6e7; font-weight: bold; text-align: center;">
+            <th colspan="13" style="border: 1px solid #000000; background-color: #b4c6e7; font-weight: bold; text-align: center;">
                 Desktop
             </th>
 
@@ -121,9 +122,13 @@
             <th style="border: 1px solid #000000; background-color: #b4c6e7; font-weight: bold; text-align: center;">Acquired</th>
             <th style="border: 1px solid #000000; background-color: #b4c6e7; font-weight: bold; text-align: center;">Property #</th>
             <th style="border: 1px solid #000000; background-color: #b4c6e7; font-weight: bold; text-align: center;">Serial #</th>
+            <th style="border: 1px solid #000000; background-color: #b4c6e7; font-weight: bold; text-align: center;">Computer Name</th>
             <th style="border: 1px solid #000000; background-color: #b4c6e7; font-weight: bold; text-align: center;">Unit Price</th>
             <th style="border: 1px solid #000000; background-color: #b4c6e7; font-weight: bold; text-align: center;">MAC</th>
-            <th style="border: 1px solid #000000; background-color: #b4c6e7; font-weight: bold; text-align: center;">OS</th>
+            <th style="border: 1px solid #000000; background-color: #b4c6e7; font-weight: bold; text-align: center;">OS Version</th>
+            <th style="border: 1px solid #000000; background-color: #b4c6e7; font-weight: bold; text-align: center;">OS License</th>
+            <th style="border: 1px solid #000000; background-color: #b4c6e7; font-weight: bold; text-align: center;">MS Office Version</th>
+            <th style="border: 1px solid #000000; background-color: #b4c6e7; font-weight: bold; text-align: center;">MS Office License</th>
             <th style="border: 1px solid #000000; background-color: #b4c6e7; font-weight: bold; text-align: center;">Storage</th>
             <th style="border: 1px solid #000000; background-color: #b4c6e7; font-weight: bold; text-align: center;">Form Factor</th>
             <th style="border: 1px solid #000000; background-color: #b4c6e7; font-weight: bold; text-align: center;">Condition</th>
@@ -237,9 +242,13 @@
                     <td style="border: 1px solid #000000; text-align: center;">{{ $dateValue($desktop) }}</td>
                     <td style="border: 1px solid #000000; text-align: center;">{{ $desktop?->property_number ?? '' }}</td>
                     <td style="border: 1px solid #000000; text-align: center;">{{ $desktop?->serial_number ?? '' }}</td>
+                    <td style="border: 1px solid #000000; text-align: center;">{{ $desktop?->computer_name ?? '' }}</td>
                     <td style="border: 1px solid #000000; text-align: center;">{{ $priceValue($desktop) }}</td>
                     <td style="border: 1px solid #000000; text-align: center;">{{ $desktop?->mac_address ?? '' }}</td>
-                    <td style="border: 1px solid #000000; text-align: center;">{{ data_get($desktop?->specs, 'os', '') }}</td>
+                    <td style="border: 1px solid #000000; text-align: center;">{{ $desktop?->device?->os_version ?? '' }}</td>
+                    <td style="border: 1px solid #000000; text-align: center;">{{ $desktop?->device?->os_license ?? '' }}</td>
+                    <td style="border: 1px solid #000000; text-align: center;">{{ $desktop?->device?->ms_office_version ?? '' }}</td>
+                    <td style="border: 1px solid #000000; text-align: center;">{{ $desktop?->device?->ms_office_license ?? '' }}</td>
                     <td style="border: 1px solid #000000; text-align: center;">{{ data_get($desktop?->specs, 'storage', '') }}</td>
                     <td style="border: 1px solid #000000; text-align: center;">{{ data_get($desktop?->specs, 'form_factor', '') }}</td>
                     <td style="border: 1px solid #000000; text-align: center;">{{ $conditionValue($desktop) }}</td>
@@ -297,13 +306,13 @@
                     {{ $officeTotal }}
                 </td>
 
-                @for($i = 4; $i <= 44; $i++)
+                @for($i = 4; $i <= 45; $i++)
                     <td style="border: 1px solid #000000; background-color: #92d050;"></td>
                 @endfor
             </tr>
         @empty
             <tr>
-                <td colspan="44" style="border: 1px solid #000000; text-align: center;">
+                <td colspan="45" style="border: 1px solid #000000; text-align: center;">
                     No records found.
                 </td>
             </tr>

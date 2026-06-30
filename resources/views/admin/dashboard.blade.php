@@ -25,8 +25,36 @@
 
         isComputerType() {
             return ['desktop', 'laptop'].includes(this.selectedDeviceTypeName());
+        },
+
+        isDesktopType() {
+            return this.selectedDeviceTypeName() === 'desktop';
+        },
+
+        formatUnitPriceValue(value) {
+            value = String(value ?? '').replace(/[^0-9.]/g, '');
+
+            let parts = value.split('.');
+            let whole = parts.shift() || '';
+            let decimals = parts.length ? '.' + parts.join('').slice(0, 2) : '';
+
+            whole = whole.replace(/^0+(?=\d)/, '');
+            whole = whole.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+            return whole + decimals;
+        },
+
+        formatUnitPriceInput(event) {
+            event.target.value = this.formatUnitPriceValue(event.target.value);
+        },
+
+        cleanUnitPrices(form) {
+            form.querySelectorAll('.unit-price-input').forEach((input) => {
+                input.value = String(input.value ?? '').replace(/,/g, '');
+            });
         }
     }"
+    x-init="$nextTick(() => $el.querySelectorAll('.unit-price-input').forEach((input) => input.value = formatUnitPriceValue(input.value)))"
     class="space-y-6"
 >
     {{-- Page Header --}}
@@ -246,7 +274,7 @@
                 </div>
                 <button type="button" @click="addDeviceOpen = false" class="rounded-lg px-3 py-1 text-xl text-gray-500 hover:bg-gray-100 hover:text-gray-700">&times;</button>
             </div>
-            <form method="POST" action="{{ route('admin.devices.store') }}">
+            <form method="POST" action="{{ route('admin.devices.store') }}" x-on:submit="cleanUnitPrices($event.target)">
                 @csrf
                 <input type="hidden" name="status" value="available">
                 <div class="max-h-[75vh] overflow-y-auto px-6 py-5">
@@ -271,6 +299,11 @@
                             @error('serial_number')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                         </div>
                         <div>
+                            <label class="mb-1 block text-sm font-medium text-gray-700">Computer Name</label>
+                            <input type="text" name="computer_name" value="{{ old('computer_name') }}" class="w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Enter computer name">
+                            @error('computer_name')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                        </div>
+                        <div>
                             <label class="mb-1 block text-sm font-medium text-gray-700">Brand</label>
                             <input type="text" name="brand" value="{{ old('brand') }}" class="w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Example: ACER, EPSON">
                             @error('brand')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
@@ -286,11 +319,6 @@
                             @error('mac_address')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                         </div>
                         <div x-show="isComputerType()" x-cloak>
-                            <label class="mb-1 block text-sm font-medium text-gray-700">Operating System</label>
-                            <input type="text" name="specs[os_version]" value="{{ old('specs.os_version') }}" class="w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Example: Windows 10" :disabled="!isComputerType()">
-                            @error('specs.os_version')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
-                        </div>
-                        <div x-show="isComputerType()" x-cloak>
                             <label class="mb-1 block text-sm font-medium text-gray-700">Memory</label>
                             <input type="text" name="specs[memory]" value="{{ old('specs.memory') }}" class="w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Example: 8GB RAM" :disabled="!isComputerType()">
                             @error('specs.memory')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
@@ -300,14 +328,81 @@
                             <input type="text" name="specs[storage]" value="{{ old('specs.storage') }}" class="w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Example: 256GB SSD" :disabled="!isComputerType()">
                             @error('specs.storage')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                         </div>
-                        <div x-show="isComputerType()" x-cloak>
+                        <div x-show="isDesktopType()" x-cloak>
                             <label class="mb-1 block text-sm font-medium text-gray-700">Form Factor</label>
-                            <input type="text" name="specs[form_factor]" value="{{ old('specs.form_factor') }}" class="w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Example: Tower, SFF" :disabled="!isComputerType()">
+                            <select
+                                name="specs[form_factor]"
+                                class="w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                :disabled="!isDesktopType()"
+                            >
+                                <option value="">-- Select Form Factor --</option>
+                                <option value="Tower Desktops" @selected(old('specs.form_factor') === 'Tower Desktops')>Tower Desktops</option>
+                                <option value="Small Form Factor (SFF) Desktops" @selected(old('specs.form_factor') === 'Small Form Factor (SFF) Desktops')>Small Form Factor (SFF) Desktops</option>
+                                <option value="All-in-One (AIO) Desktops" @selected(old('specs.form_factor') === 'All-in-One (AIO) Desktops')>All-in-One (AIO) Desktops</option>
+                                <option value="Mini PCs" @selected(old('specs.form_factor') === 'Mini PCs')>Mini PCs</option>
+                                <option value="Workstations" @selected(old('specs.form_factor') === 'Workstations')>Workstations</option>
+                            </select>
                             @error('specs.form_factor')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                         </div>
+
+                        {{-- OS Version --}}
+                        <div id="dash_os_version_wrapper" style="display:none;">
+                            <label class="mb-1 block text-sm font-medium text-gray-700">OS Version</label>
+                            <select name="os_version" id="dash_os_version_select" class="w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                <option value="">-- Select OS --</option>
+                                <option value="Windows 7" @selected(old('os_version') === 'Windows 7')>Windows 7</option>
+                                <option value="Windows 8" @selected(old('os_version') === 'Windows 8')>Windows 8</option>
+                                <option value="Windows 10" @selected(old('os_version') === 'Windows 10')>Windows 10</option>
+                                <option value="Windows 11" @selected(old('os_version') === 'Windows 11')>Windows 11</option>
+                            </select>
+                        </div>
+
+                        {{-- OS License --}}
+                        <div id="dash_os_license_wrapper" style="display:none;">
+                            <label class="mb-1 block text-sm font-medium text-gray-700">OS License</label>
+                            <select name="os_license" class="w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                <option value="">-- Select License --</option>
+                                <option value="Cracked" @selected(old('os_license') === 'Cracked')>Cracked</option>
+                                <option value="OEM Licensed" @selected(old('os_license') === 'OEM Licensed')>OEM Licensed</option>
+                            </select>
+                        </div>
+
+                        {{-- MS Office Version --}}
+                        <div id="dash_ms_version_wrapper" style="display:none;">
+                            <label class="mb-1 block text-sm font-medium text-gray-700">MS Office Version</label>
+                            <select name="ms_office_version" id="dash_ms_version_select" class="w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                <option value="">-- Select MS Office --</option>
+                                <option value="Office 2007" @selected(old('ms_office_version') === 'Office 2007')>Office 2007</option>
+                                <option value="Office 2010" @selected(old('ms_office_version') === 'Office 2010')>Office 2010</option>
+                                <option value="Office 2013" @selected(old('ms_office_version') === 'Office 2013')>Office 2013</option>
+                                <option value="Office 2016" @selected(old('ms_office_version') === 'Office 2016')>Office 2016</option>
+                                <option value="Office 2019" @selected(old('ms_office_version') === 'Office 2019')>Office 2019</option>
+                                <option value="Office 2021" @selected(old('ms_office_version') === 'Office 2021')>Office 2021</option>
+                                <option value="Microsoft 365" @selected(old('ms_office_version') === 'Microsoft 365')>Microsoft 365</option>
+                            </select>
+                        </div>
+
+                        {{-- MS Office License --}}
+                        <div id="dash_ms_license_wrapper" style="display:none;">
+                            <label class="mb-1 block text-sm font-medium text-gray-700">MS Office License</label>
+                            <select name="ms_office_license" class="w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                <option value="">-- Select License --</option>
+                                <option value="Cracked" @selected(old('ms_office_license') === 'Cracked')>Cracked</option>
+                                <option value="OEM Licensed" @selected(old('ms_office_license') === 'OEM Licensed')>OEM Licensed</option>
+                            </select>
+                        </div>
+
                         <div>
                             <label class="mb-1 block text-sm font-medium text-gray-700">Unit Price</label>
-                            <input type="number" step="0.01" min="0" name="unit_price" value="{{ old('unit_price') }}" class="w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            <input
+                                type="text"
+                                inputmode="decimal"
+                                name="unit_price"
+                                value="{{ old('unit_price') }}"
+                                placeholder="e.g. 25,000.00"
+                                class="unit-price-input w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                x-on:input="formatUnitPriceInput($event)"
+                            >
                             @error('unit_price')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                         </div>
                         <div>
@@ -409,6 +504,65 @@
             scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } }
         }
     });
+</script>
+@endpush
+
+@push('scripts')
+<script>
+(function () {
+    var typeNames = @json($types->pluck('name', 'id'));
+
+    function getTypeName(typeId) {
+        return (typeNames[typeId] || '').toLowerCase();
+    }
+
+    function isComputer(typeId) {
+        var n = getTypeName(typeId);
+        return n === 'desktop' || n === 'laptop';
+    }
+
+    function show(el) { if (el) el.style.display = ''; }
+    function hide(el) { if (el) el.style.display = 'none'; }
+
+    var typeSelect  = document.querySelector('select[name="device_type_id"]');
+    var osVerSel    = document.getElementById('dash_os_version_select');
+    var msVerSel    = document.getElementById('dash_ms_version_select');
+    var osVerWrap   = document.getElementById('dash_os_version_wrapper');
+    var osLicWrap   = document.getElementById('dash_os_license_wrapper');
+    var msVerWrap   = document.getElementById('dash_ms_version_wrapper');
+    var msLicWrap   = document.getElementById('dash_ms_license_wrapper');
+
+    function updateFields() {
+        var typeId = typeSelect ? typeSelect.value : '';
+        var computer = isComputer(typeId);
+        computer ? show(osVerWrap) : hide(osVerWrap);
+        computer ? show(msVerWrap) : hide(msVerWrap);
+        if (computer && osVerSel && osVerSel.value) { show(osLicWrap); } else { hide(osLicWrap); }
+        if (computer && msVerSel && msVerSel.value) { show(msLicWrap); } else { hide(msLicWrap); }
+    }
+
+    if (typeSelect) {
+        typeSelect.addEventListener('change', updateFields);
+        new MutationObserver(updateFields).observe(typeSelect, { attributes: true, childList: true, subtree: true });
+    }
+    if (osVerSel) {
+        osVerSel.addEventListener('change', function () {
+            this.value ? show(osLicWrap) : hide(osLicWrap);
+        });
+    }
+    if (msVerSel) {
+        msVerSel.addEventListener('change', function () {
+            this.value ? show(msLicWrap) : hide(msLicWrap);
+        });
+    }
+
+    // Re-run when modal opens
+    document.addEventListener('click', function () {
+        setTimeout(updateFields, 150);
+    });
+
+    updateFields();
+})();
 </script>
 @endpush
 @endsection

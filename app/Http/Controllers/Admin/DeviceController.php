@@ -214,6 +214,11 @@ class DeviceController extends Controller
             'specs.memory' => ['nullable', 'string', 'max:50'],
             'specs.storage' => ['nullable', 'string', 'max:50'],
             'specs.form_factor' => ['nullable', 'string', 'max:50'],
+
+            'os_version' => ['nullable', 'string', 'in:Windows 7,Windows 8,Windows 10,Windows 11'],
+            'os_license' => ['nullable', 'string', 'in:Cracked,OEM Licensed'],
+            'ms_office_version' => ['nullable', 'string', 'in:Office 2007,Office 2010,Office 2013,Office 2016,Office 2019,Office 2021,Microsoft 365'],
+            'ms_office_license' => ['nullable', 'string', 'in:Cracked,OEM Licensed'],
         ], [
             'property_number.regex' => 'Property number may only contain letters, numbers, hyphens, and slashes.',
             'serial_number.regex' => 'Serial number may only contain letters, numbers, and hyphens.',
@@ -222,6 +227,10 @@ class DeviceController extends Controller
             'mac_address.regex' => 'Please enter a valid MAC address, e.g. 00:1A:2B:3C:4D:5E.',
             'date_acquired.before_or_equal' => 'Date acquired cannot be in the future.',
             'last_maintenance_date.before_or_equal' => 'Last maintenance date cannot be in the future.',
+            'os_version.in' => 'Invalid OS version selected.',
+            'os_license.in' => 'OS license must be either Cracked or OEM Licensed.',
+            'ms_office_version.in' => 'Invalid MS Office version selected.',
+            'ms_office_license.in' => 'MS Office license must be either Cracked or OEM Licensed.',
         ]);
 
         /*
@@ -345,6 +354,10 @@ class DeviceController extends Controller
 
         if (!$isComputerType) {
             $data['mac_address'] = null;
+            $data['os_version'] = null;
+            $data['os_license'] = null;
+            $data['ms_office_version'] = null;
+            $data['ms_office_license'] = null;
 
             $data['specs'] = collect($data['specs'] ?? [])
                 ->except([

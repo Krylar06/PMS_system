@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\DeviceController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\ActivityLogController;
+use App\Http\Controllers\Admin\ReportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -79,6 +80,21 @@ Route::middleware(['auth', 'role:admin,custodian'])->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
         Route::view('/org-browser', 'admin.org-browser')->name('admin.org-browser');
         Route::view('/scanner', 'admin.scanner')->name('admin.scanner');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Reports
+        |--------------------------------------------------------------------------
+        */
+        Route::prefix('reports')->name('admin.reports.')->group(function () {
+            Route::get('/', [ReportController::class, 'index'])->name('index');
+            Route::get('/assets', [ReportController::class, 'assets'])->name('assets');
+            Route::get('/accounts', [ReportController::class, 'accounts'])
+                ->middleware('role:admin')
+                ->name('accounts');
+            Route::get('/checked-equipment', [ReportController::class, 'checkedEquipment'])->name('checkedEquipment');
+            Route::get('/checklist', [ReportController::class, 'checklist'])->name('checklist');
+        });
 
         /*
         |--------------------------------------------------------------------------
