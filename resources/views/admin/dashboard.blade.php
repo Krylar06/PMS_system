@@ -25,8 +25,36 @@
 
         isComputerType() {
             return ['desktop', 'laptop'].includes(this.selectedDeviceTypeName());
+        },
+
+        isDesktopType() {
+            return this.selectedDeviceTypeName() === 'desktop';
+        },
+
+        formatUnitPriceValue(value) {
+            value = String(value ?? '').replace(/[^0-9.]/g, '');
+
+            let parts = value.split('.');
+            let whole = parts.shift() || '';
+            let decimals = parts.length ? '.' + parts.join('').slice(0, 2) : '';
+
+            whole = whole.replace(/^0+(?=\d)/, '');
+            whole = whole.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+            return whole + decimals;
+        },
+
+        formatUnitPriceInput(event) {
+            event.target.value = this.formatUnitPriceValue(event.target.value);
+        },
+
+        cleanUnitPrices(form) {
+            form.querySelectorAll('.unit-price-input').forEach((input) => {
+                input.value = String(input.value ?? '').replace(/,/g, '');
+            });
         }
     }"
+    x-init="$nextTick(() => $el.querySelectorAll('.unit-price-input').forEach((input) => input.value = formatUnitPriceValue(input.value)))"
     class="space-y-6"
 >
     {{-- Page Header --}}
@@ -246,7 +274,7 @@
                 </div>
                 <button type="button" @click="addDeviceOpen = false" class="rounded-lg px-3 py-1 text-xl text-gray-500 hover:bg-gray-100 hover:text-gray-700">&times;</button>
             </div>
-            <form method="POST" action="{{ route('admin.devices.store') }}">
+            <form method="POST" action="{{ route('admin.devices.store') }}" x-on:submit="cleanUnitPrices($event.target)">
                 @csrf
                 <input type="hidden" name="status" value="available">
                 <div class="max-h-[75vh] overflow-y-auto px-6 py-5">
@@ -269,6 +297,11 @@
                             <label class="mb-1 block text-sm font-medium text-gray-700">Serial Number</label>
                             <input type="text" name="serial_number" value="{{ old('serial_number') }}" class="w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Enter serial number">
                             @error('serial_number')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                        </div>
+                        <div>
+                            <label class="mb-1 block text-sm font-medium text-gray-700">Computer Name</label>
+                            <input type="text" name="computer_name" value="{{ old('computer_name') }}" class="w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Enter computer name">
+                            @error('computer_name')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                         </div>
                         <div>
                             <label class="mb-1 block text-sm font-medium text-gray-700">Brand</label>
@@ -295,9 +328,20 @@
                             <input type="text" name="specs[storage]" value="{{ old('specs.storage') }}" class="w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Example: 256GB SSD" :disabled="!isComputerType()">
                             @error('specs.storage')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                         </div>
-                        <div x-show="isComputerType()" x-cloak>
+                        <div x-show="isDesktopType()" x-cloak>
                             <label class="mb-1 block text-sm font-medium text-gray-700">Form Factor</label>
-                            <input type="text" name="specs[form_factor]" value="{{ old('specs.form_factor') }}" class="w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Example: Tower, SFF" :disabled="!isComputerType()">
+                            <select
+                                name="specs[form_factor]"
+                                class="w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                :disabled="!isDesktopType()"
+                            >
+                                <option value="">-- Select Form Factor --</option>
+                                <option value="Tower Desktops" @selected(old('specs.form_factor') === 'Tower Desktops')>Tower Desktops</option>
+                                <option value="Small Form Factor (SFF) Desktops" @selected(old('specs.form_factor') === 'Small Form Factor (SFF) Desktops')>Small Form Factor (SFF) Desktops</option>
+                                <option value="All-in-One (AIO) Desktops" @selected(old('specs.form_factor') === 'All-in-One (AIO) Desktops')>All-in-One (AIO) Desktops</option>
+                                <option value="Mini PCs" @selected(old('specs.form_factor') === 'Mini PCs')>Mini PCs</option>
+                                <option value="Workstations" @selected(old('specs.form_factor') === 'Workstations')>Workstations</option>
+                            </select>
                             @error('specs.form_factor')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                         </div>
 
@@ -350,7 +394,15 @@
 
                         <div>
                             <label class="mb-1 block text-sm font-medium text-gray-700">Unit Price</label>
-                            <input type="number" step="0.01" min="0" name="unit_price" value="{{ old('unit_price') }}" class="w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            <input
+                                type="text"
+                                inputmode="decimal"
+                                name="unit_price"
+                                value="{{ old('unit_price') }}"
+                                placeholder="e.g. 25,000.00"
+                                class="unit-price-input w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                x-on:input="formatUnitPriceInput($event)"
+                            >
                             @error('unit_price')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                         </div>
                         <div>

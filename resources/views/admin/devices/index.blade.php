@@ -50,6 +50,33 @@
             return name === 'desktop' || name === 'laptop';
         },
 
+        isDesktopType(typeId) {
+            return this.getTypeName(typeId) === 'desktop';
+        },
+
+        formatUnitPriceValue(value) {
+            value = String(value ?? '').replace(/[^0-9.]/g, '');
+
+            let parts = value.split('.');
+            let whole = parts.shift() || '';
+            let decimals = parts.length ? '.' + parts.join('').slice(0, 2) : '';
+
+            whole = whole.replace(/^0+(?=\d)/, '');
+            whole = whole.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+            return whole + decimals;
+        },
+
+        formatUnitPriceInput(event) {
+            event.target.value = this.formatUnitPriceValue(event.target.value);
+        },
+
+        cleanUnitPrices(form) {
+            form.querySelectorAll('.unit-price-input').forEach((input) => {
+                input.value = String(input.value ?? '').replace(/,/g, '');
+            });
+        },
+
         openEdit(device) {
             device.specs = device.specs ?? {};
             device.specs.os = device.specs.os ?? '';
@@ -60,6 +87,7 @@
             device.computer_name = device.computer_name ?? '';
             device.status = device.status ?? 'available';
             device.condition = device.condition ?? 'serviceable';
+            device.unit_price = this.formatUnitPriceValue(device.unit_price);
 
             this.editDevice = device;
             this.editOpen = true;
@@ -71,6 +99,7 @@
             this.$nextTick(() => this.$refs.confirmDeleteBtn && this.$refs.confirmDeleteBtn.focus());
         }
     }"
+    x-init="$nextTick(() => $el.querySelectorAll('.unit-price-input').forEach((input) => input.value = formatUnitPriceValue(input.value)))"
     class="space-y-5"
 >
     <div class="flex items-start justify-between gap-3">
@@ -489,7 +518,7 @@
 
     {{-- ADD MODAL --}}
     <x-modal show="addOpen" title="Add Device">
-        <form method="POST" action="{{ route('admin.devices.store') }}" class="space-y-4">
+        <form method="POST" action="{{ route('admin.devices.store') }}" class="space-y-4" x-on:submit="cleanUnitPrices($event.target)">
             @csrf
 
             <input type="hidden" name="status" value="available">
@@ -616,16 +645,20 @@
                     >
                 </div>
 
-                <div x-show="isComputerType(addTypeId)" x-cloak>
+                <div x-show="isDesktopType(addTypeId)" x-cloak>
                     <label class="text-sm font-medium">Form Factor</label>
-                    <input
+                    <select
                         name="specs[form_factor]"
-                        value="{{ old('specs.form_factor') }}"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
-                        maxlength="50"
-                        placeholder="Example: Tower, SFF, Mini PC, All-in-One"
-                        :disabled="!isComputerType(addTypeId)"
+                        :disabled="!isDesktopType(addTypeId)"
                     >
+                        <option value="">-- Select Form Factor --</option>
+                        <option value="Tower Desktops" @selected(old('specs.form_factor') === 'Tower Desktops')>Tower Desktops</option>
+                        <option value="Small Form Factor (SFF) Desktops" @selected(old('specs.form_factor') === 'Small Form Factor (SFF) Desktops')>Small Form Factor (SFF) Desktops</option>
+                        <option value="All-in-One (AIO) Desktops" @selected(old('specs.form_factor') === 'All-in-One (AIO) Desktops')>All-in-One (AIO) Desktops</option>
+                        <option value="Mini PCs" @selected(old('specs.form_factor') === 'Mini PCs')>Mini PCs</option>
+                        <option value="Workstations" @selected(old('specs.form_factor') === 'Workstations')>Workstations</option>
+                    </select>
                 </div>
 
                 {{-- OS Version --}}
@@ -680,12 +713,11 @@
                     <input
                         name="unit_price"
                         value="{{ old('unit_price') }}"
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        max="9999999999.99"
-                        placeholder="e.g. 25000.00"
-                        class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                        type="text"
+                        inputmode="decimal"
+                        placeholder="e.g. 25,000.00"
+                        class="unit-price-input mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                        x-on:input="formatUnitPriceInput($event)"
                     >
                 </div>
 
@@ -769,7 +801,7 @@
 
     {{-- EDIT MODAL --}}
     <x-modal show="editOpen" title="Edit Device">
-        <form method="POST" :action="`{{ url('/admin/devices') }}/${editDevice.id}`" class="space-y-4">
+        <form method="POST" :action="`{{ url('/admin/devices') }}/${editDevice.id}`" class="space-y-4" x-on:submit="cleanUnitPrices($event.target)">
             @csrf
             @method('PUT')
 
@@ -894,16 +926,21 @@
                     >
                 </div>
 
-                <div x-show="isComputerType(editDevice.device_type_id)" x-cloak>
+                <div x-show="isDesktopType(editDevice.device_type_id)" x-cloak>
                     <label class="text-sm font-medium">Form Factor</label>
-                    <input
+                    <select
                         name="specs[form_factor]"
                         class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                         x-model="editDevice.specs.form_factor"
-                        maxlength="50"
-                        placeholder="Example: Tower, SFF, Mini PC, All-in-One"
-                        :disabled="!isComputerType(editDevice.device_type_id)"
+                        :disabled="!isDesktopType(editDevice.device_type_id)"
                     >
+                        <option value="">-- Select Form Factor --</option>
+                        <option value="Tower Desktops">Tower Desktops</option>
+                        <option value="Small Form Factor (SFF) Desktops">Small Form Factor (SFF) Desktops</option>
+                        <option value="All-in-One (AIO) Desktops">All-in-One (AIO) Desktops</option>
+                        <option value="Mini PCs">Mini PCs</option>
+                        <option value="Workstations">Workstations</option>
+                    </select>
                 </div>
 
                 {{-- OS Version --}}
@@ -957,12 +994,12 @@
                     <label class="text-sm font-medium">Unit Price</label>
                     <input
                         name="unit_price"
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        max="9999999999.99"
-                        class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                        type="text"
+                        inputmode="decimal"
+                        placeholder="e.g. 25,000.00"
+                        class="unit-price-input mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
                         x-model="editDevice.unit_price"
+                        x-on:input="formatUnitPriceInput($event)"
                     >
                 </div>
 
