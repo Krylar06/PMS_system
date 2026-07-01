@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\DeviceChecklistController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
@@ -13,7 +14,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\ReportController;
-use App\Http\Controllers\Admin\DeviceChecklistController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -94,6 +95,7 @@ Route::middleware(['auth', 'role:admin,custodian'])->group(function () {
                 ->middleware('role:admin')
                 ->name('accounts');
             Route::get('/checked-equipment', [ReportController::class, 'checkedEquipment'])->name('checkedEquipment');
+            Route::get('/checked-equipment/{record}/pdf', [ReportController::class, 'checkedEquipmentPdf'])->name('checkedEquipment.pdf');
             Route::get('/checklist', [ReportController::class, 'checklist'])->name('checklist');
         });
 
@@ -109,10 +111,14 @@ Route::middleware(['auth', 'role:admin,custodian'])->group(function () {
             ->name('admin.devices.markChecked');
 
         Route::get('/devices/{device}/maintenance-checklist', [DeviceChecklistController::class, 'create'])
-            ->name('admin.devices.checklist.create');
+            ->name('admin.devices.checklist.form');
 
-        Route::post('/devices/{device}/maintenance-checklist/pdf', [DeviceChecklistController::class, 'generate'])
-            ->name('admin.devices.checklist.generate');
+        Route::post('/devices/{device}/maintenance-checklist', [DeviceChecklistController::class, 'store'])
+            ->name('admin.devices.checklist.save');
+
+        // Legacy alias: old forms that still post to /pdf will still save instead of downloading.
+        Route::post('/devices/{device}/maintenance-checklist/pdf', [DeviceChecklistController::class, 'store'])
+            ->name('admin.devices.checklist.pdf');
 
         Route::get('/devices/{device}/maintenance-history', [DeviceController::class, 'maintenanceHistory'])
             ->name('admin.devices.history');
@@ -123,8 +129,11 @@ Route::middleware(['auth', 'role:admin,custodian'])->group(function () {
         Route::get('/devices/generate-qr', [DeviceController::class, 'generateQr'])
             ->name('admin.devices.qr.index');
 
-        Route::resource('/devices', DeviceController::class)->names('admin.devices')->except(['destroy']);
+        Route::resource('/devices', DeviceController::class)
+            ->names('admin.devices')
+            ->except(['destroy']);
     });
+
 
     /*
     |--------------------------------------------------------------------------

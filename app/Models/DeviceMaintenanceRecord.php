@@ -12,11 +12,14 @@ class DeviceMaintenanceRecord extends Model
         'maintenance_date',
         'maintenance_type',
         'remarks',
+        'corrective_action',
+        'checklist_data',
         'checked_by',
     ];
 
     protected $casts = [
         'maintenance_date' => 'date',
+        'checklist_data' => 'array',
     ];
 
     public function device(): BelongsTo

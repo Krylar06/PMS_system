@@ -2,6 +2,15 @@
 
 @section('title', 'Maintenance Checklist')
 @section('page_title', 'Maintenance Checklist')
+@section('breadcrumbs')
+    <a href="{{ route('admin.dashboard') }}" class="hover:text-blue-600">Dashboard</a>
+    <span>/</span>
+    <a href="{{ route('admin.devices.index') }}" class="hover:text-blue-600">Equipment Manager</a>
+    <span>/</span>
+    <a href="{{ route('admin.devices.show', $device) }}" class="hover:text-blue-600">Device Details</a>
+    <span>/</span>
+    <span class="font-medium text-gray-800">Maintenance Checklist</span>
+@endsection
 
 @section('content')
 @php
@@ -11,26 +20,33 @@
     $college = $office?->college;
 @endphp
 
-<div class="mx-auto max-w-6xl space-y-5">
-    <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-        <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+<div class="space-y-6">
+    <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
-                <h1 class="text-2xl font-semibold text-gray-900">Preventive Maintenance Checklist</h1>
+                <h1 class="text-2xl font-semibold text-gray-900">
+                    Preventive Maintenance Checklist
+                </h1>
                 <p class="mt-1 text-sm text-gray-500">
-                    Select OK or Not OK for each hardware item. For software, choose ✓ or -.
+                    Choose OK or Not OK for each hardware item. For software, choose ✓ or -.
                 </p>
             </div>
 
             <a
                 href="{{ route('admin.devices.show', $device) }}"
-                class="inline-flex items-center justify-center rounded-xl bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200"
+                class="inline-flex rounded-xl bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200"
             >
                 Back to Device
             </a>
         </div>
     </div>
 
-    <form method="POST" action="{{ route('admin.devices.checklist.generate', $device) }}" target="_self" class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+    <form
+        method="POST"
+        action="{{ route('admin.devices.checklist.save', $device) }}"
+        target="_self"
+        class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm"
+    >
         @csrf
 
         @if($errors->any())
@@ -44,91 +60,145 @@
             </div>
         @endif
 
-        <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div class="grid grid-cols-1 gap-5 md:grid-cols-3">
             <div>
-                <label class="text-sm font-medium text-gray-700">Date Checked</label>
+                <label class="mb-1 block text-sm font-medium text-gray-700">Date Checked</label>
                 <input
                     type="date"
-                    name="maintenance_date"
-                    value="{{ old('maintenance_date', $defaultDate) }}"
-                    max="{{ now()->format('Y-m-d') }}"
-                    class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
-                    required
+                    name="date_checked"
+                    value="{{ old('date_checked', $defaultDate ?? now()->toDateString()) }}"
+                    max="{{ now()->toDateString() }}"
+                    class="w-full rounded-lg border border-gray-300 px-3 py-2"
                 >
             </div>
 
             <div>
-                <label class="text-sm font-medium text-gray-700">Office / Unit</label>
+                <label class="mb-1 block text-sm font-medium text-gray-700">Office / Unit</label>
                 <input
                     type="text"
                     value="{{ $office?->name ?? 'Unassigned' }}"
-                    class="mt-1 w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-gray-700"
                     readonly
+                    class="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2"
                 >
             </div>
 
             <div>
-                <label class="text-sm font-medium text-gray-700">College</label>
+                <label class="mb-1 block text-sm font-medium text-gray-700">College</label>
                 <input
                     type="text"
                     value="{{ $college?->name ?? '-' }}"
-                    class="mt-1 w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-gray-700"
                     readonly
+                    class="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2"
                 >
             </div>
         </div>
 
-        <div class="mt-5 rounded-xl border border-gray-200 bg-gray-50 p-4">
-            <div class="grid grid-cols-1 gap-3 text-sm md:grid-cols-4">
+        <div class="mt-6 rounded-xl border border-gray-200 bg-gray-50 p-5">
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
                 <div>
-                    <div class="text-gray-500">Device Type</div>
+                    <div class="text-sm text-gray-500">Device Type</div>
                     <div class="font-semibold text-gray-900">{{ $device->type?->name ?? '-' }}</div>
                 </div>
+
                 <div>
-                    <div class="text-gray-500">Property Number</div>
+                    <div class="text-sm text-gray-500">Property Number</div>
                     <div class="font-semibold text-gray-900">{{ $device->property_number }}</div>
                 </div>
+
                 <div>
-                    <div class="text-gray-500">Serial Number</div>
+                    <div class="text-sm text-gray-500">Serial Number</div>
                     <div class="font-semibold text-gray-900">{{ $device->serial_number ?: '-' }}</div>
                 </div>
+
                 <div>
-                    <div class="text-gray-500">Checked By</div>
-                    <div class="font-semibold text-gray-900">{{ auth()->user()->name ?? 'Current user' }}</div>
+                    <div class="text-sm text-gray-500">Checked By</div>
+                    <div class="font-semibold text-gray-900">{{ auth()->user()->name ?? '-' }}</div>
                 </div>
             </div>
         </div>
 
-        <div class="mt-5 overflow-x-auto rounded-xl border border-gray-200">
+        <div class="mt-6 overflow-x-auto rounded-xl border border-gray-200">
             <table class="min-w-full text-sm">
-                <thead class="bg-gray-50 text-left text-gray-700">
+                <thead class="bg-gray-50 text-left">
                     <tr>
-                        <th class="w-1/3 px-4 py-3 font-semibold">Checklist Item</th>
-                        <th class="px-4 py-3 font-semibold">Selection</th>
+                        <th class="px-4 py-3 font-semibold text-gray-700">Section</th>
+                        <th class="px-4 py-3 font-semibold text-gray-700">Checklist Item</th>
+                        <th class="px-4 py-3 text-center font-semibold text-gray-700">OK</th>
+                        <th class="px-4 py-3 text-center font-semibold text-gray-700">Not OK</th>
                     </tr>
                 </thead>
+
                 <tbody class="divide-y divide-gray-200">
-                    @foreach($checklistItems as $key => $label)
+                    @foreach($checklistItems as $key => $item)
                         <tr>
-                            <td class="px-4 py-3 text-gray-800">{{ $label }}</td>
-                            <td class="px-4 py-3">
-                                <select name="{{ $key }}" class="w-full rounded-lg border border-gray-300 px-3 py-2">
-                                    <option value="">-- Select --</option>
-                                    <option value="OK" @selected(old($key) === 'OK')>OK</option>
-                                    <option value="Not OK" @selected(old($key) === 'Not OK')>Not OK</option>
-                                </select>
+                            <td class="px-4 py-3 text-gray-700">{{ $item['group'] ?? '-' }}</td>
+                            <td class="px-4 py-3 text-gray-800">{{ $item['label'] ?? '-' }}</td>
+
+                            <td class="px-4 py-3 text-center">
+                                <label class="inline-flex cursor-pointer items-center justify-center">
+                                    <input
+                                        type="radio"
+                                        name="hardware[{{ $key }}]"
+                                        value="OK"
+                                        class="peer sr-only"
+                                        @checked(old("hardware.$key") === 'OK')
+                                    >
+                                    <span class="flex h-8 w-8 items-center justify-center rounded border-2 border-gray-400 text-lg font-bold text-transparent peer-checked:border-green-600 peer-checked:bg-green-50 peer-checked:text-green-700">
+                                        ✓
+                                    </span>
+                                </label>
+                            </td>
+
+                            <td class="px-4 py-3 text-center">
+                                <label class="inline-flex cursor-pointer items-center justify-center">
+                                    <input
+                                        type="radio"
+                                        name="hardware[{{ $key }}]"
+                                        value="Not OK"
+                                        class="peer sr-only"
+                                        @checked(old("hardware.$key") === 'Not OK')
+                                    >
+                                    <span class="flex h-8 w-8 items-center justify-center rounded border-2 border-gray-400 text-lg font-bold text-transparent peer-checked:border-red-600 peer-checked:bg-red-50 peer-checked:text-red-700">
+                                        ✓
+                                    </span>
+                                </label>
                             </td>
                         </tr>
                     @endforeach
 
                     @foreach($softwareItems as $key => $label)
                         <tr>
+                            <td class="px-4 py-3 text-gray-700">Software</td>
                             <td class="px-4 py-3 text-gray-800">{{ $label }}</td>
-                            <td class="px-4 py-3">
-                                <select name="{{ $key }}" class="w-full rounded-lg border border-gray-300 px-3 py-2">
-                                    <option value="dash" @selected(old($key, 'dash') === 'dash')>-</option>
-                                    <option value="check" @selected(old($key) === 'check')>✓</option>
-                                </select>
+
+                            <td class="px-4 py-3 text-center">
+                                <label class="inline-flex cursor-pointer items-center justify-center">
+                                    <input
+                                        type="radio"
+                                        name="software[{{ $key }}]"
+                                        value="check"
+                                        class="peer sr-only"
+                                        @checked(old("software.$key") === 'check')
+                                    >
+                                    <span class="flex h-8 w-8 items-center justify-center rounded border-2 border-gray-400 text-lg font-bold text-transparent peer-checked:border-green-600 peer-checked:bg-green-50 peer-checked:text-green-700">
+                                        ✓
+                                    </span>
+                                </label>
+                            </td>
+
+                            <td class="px-4 py-3 text-center">
+                                <label class="inline-flex cursor-pointer items-center justify-center">
+                                    <input
+                                        type="radio"
+                                        name="software[{{ $key }}]"
+                                        value="dash"
+                                        class="peer sr-only"
+                                        @checked(old("software.$key") === 'dash')
+                                    >
+                                    <span class="flex h-8 w-8 items-center justify-center rounded border-2 border-gray-400 text-lg font-bold text-transparent peer-checked:border-gray-600 peer-checked:bg-gray-50 peer-checked:text-gray-700">
+                                        -
+                                    </span>
+                                </label>
                             </td>
                         </tr>
                     @endforeach
@@ -136,43 +206,41 @@
             </table>
         </div>
 
-        <div class="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div class="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2">
             <div>
-                <label class="text-sm font-medium text-gray-700">Remarks</label>
+                <label class="mb-1 block text-sm font-medium text-gray-700">Remarks</label>
                 <textarea
                     name="remarks"
                     rows="4"
-                    maxlength="1000"
-                    class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                    class="w-full rounded-lg border border-gray-300 px-3 py-2"
                     placeholder="Optional remarks"
                 >{{ old('remarks') }}</textarea>
             </div>
 
             <div>
-                <label class="text-sm font-medium text-gray-700">Corrective Action</label>
+                <label class="mb-1 block text-sm font-medium text-gray-700">Corrective Action</label>
                 <textarea
                     name="corrective_action"
                     rows="4"
-                    maxlength="1000"
-                    class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                    class="w-full rounded-lg border border-gray-300 px-3 py-2"
                     placeholder="Optional corrective action"
                 >{{ old('corrective_action') }}</textarea>
             </div>
         </div>
 
-        <div class="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-end">
+        <div class="mt-6 flex justify-end gap-2">
             <a
-                href="{{ route('admin.devices.index') }}"
-                class="inline-flex items-center justify-center rounded-xl bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200"
+                href="{{ route('admin.devices.show', $device) }}"
+                class="rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200"
             >
                 Cancel
             </a>
 
             <button
                 type="submit"
-                class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
             >
-                Generate PDF Checklist
+                Save Checklist
             </button>
         </div>
     </form>

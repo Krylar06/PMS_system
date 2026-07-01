@@ -2,6 +2,11 @@
 
 @section('title', 'Device Manager')
 @section('page_title', 'Device Manager')
+@section('breadcrumbs')
+    <a href="{{ route('admin.dashboard') }}" class="hover:text-blue-600">Dashboard</a>
+    <span>/</span>
+    <span class="font-medium text-gray-800">Equipment Manager</span>
+@endsection
 
 @section('content')
 
@@ -11,6 +16,7 @@
                                 deleteOpen: false,
 
                                 addTypeId: '{{ old('device_type_id', $types->first()?->id) }}',
+                                addComputerName: @js(old('computer_name', old('specs.computer_name', ''))),
 
                                 typeNames: @js($types->pluck('name', 'id')),
 
@@ -19,6 +25,7 @@
                                     device_type_id: '',
                                     property_number: '',
                                     serial_number: '',
+                                    computer_name: '',
                                     brand: '',
                                     model: '',
                                     mac_address: '',
@@ -30,6 +37,7 @@
                                     status: 'available',
                                     condition: 'serviceable',
                                     specs: {
+                                        computer_name: '',
                                         os: '',
                                         memory: '',
                                         storage: '',
@@ -50,6 +58,8 @@
 
                                 openEdit(device) {
                                     device.specs = device.specs ?? {};
+                                    device.specs.computer_name = device.specs.computer_name ?? '';
+                                    device.computer_name = device.computer_name ?? device.specs.computer_name ?? '';
                                     device.specs.os = device.specs.os ?? '';
                                     device.specs.memory = device.specs.memory ?? '';
                                     device.specs.storage = device.specs.storage ?? '';
@@ -274,14 +284,12 @@
                                 History
                             </a>
 
-                        <a
-                            href="{{ route('admin.devices.checklist.create', $d) }}"
-                            target="_blank"
-                            rel="noopener"
-                            class="rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
-                        >
-                            Mark Checked
-                        </a>
+
+                            <a href="{{ route('admin.devices.checklist.form', $d) }}"
+                                 class="rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700">
+                                Mark Checked
+                            </a>
+
                             <form method="POST" action="{{ route('admin.devices.markChecked', $d) }}">
                                 @csrf
                                 @method('PATCH')
@@ -297,6 +305,7 @@
                                 x-on:click="openEdit({
                                                                                 id: {{ $d->id }},
                                                                                 device_type_id: '{{ $d->device_type_id }}',
+                                                                                computer_name: @js($d->computer_name ?? data_get($d->specs, 'computer_name', '')),
                                                                                 property_number: @js($d->property_number),
                                                                                 serial_number: @js($d->serial_number ?? ''),
                                                                                 brand: @js($d->brand ?? ''),
@@ -310,6 +319,7 @@
                                                                                 condition: @js($d->condition ?? 'serviceable'),
                                                                                 notes: @js($d->notes ?? ''),
                                                                                 specs: {
+                                                                                    computer_name: @js(data_get($d->specs, 'computer_name', '')),
                                                                                     os: @js(data_get($d->specs, 'os', '')),
                                                                                     memory: @js(data_get($d->specs, 'memory', '')),
                                                                                     storage: @js(data_get($d->specs, 'storage', '')),
@@ -405,19 +415,8 @@
                                             History
                                         </a>
 
-                                        <form method="POST" action="{{ route('admin.devices.markChecked', $d) }}">
-                                            @csrf
-                                            @method('PATCH')
-
-                                            <button type="submit"
-                                                class="rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700">
-                                                Mark Checked
-                                            </button>
-                                        </form>
                                     <a
-                                        href="{{ route('admin.devices.checklist.create', $d) }}"
-                                        target="_blank"
-                                        rel="noopener"
+                                        href="{{ route('admin.devices.checklist.form', $d) }}"
                                         class="rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
                                     >
                                         Mark Checked
@@ -428,6 +427,7 @@
                                             x-on:click="openEdit({
                                                                                             id: {{ $d->id }},
                                                                                             device_type_id: '{{ $d->device_type_id }}',
+                                                                                            computer_name: @js($d->computer_name ?? data_get($d->specs, 'computer_name', '')),
                                                                                             property_number: @js($d->property_number),
                                                                                             serial_number: @js($d->serial_number ?? ''),
                                                                                             brand: @js($d->brand ?? ''),
@@ -441,6 +441,7 @@
                                                                                             condition: @js($d->condition ?? 'serviceable'),
                                                                                             notes: @js($d->notes ?? ''),
                                                                                             specs: {
+                                                                                                computer_name: @js(data_get($d->specs, 'computer_name', '')),
                                                                                                 os: @js(data_get($d->specs, 'os', '')),
                                                                                                 memory: @js(data_get($d->specs, 'memory', '')),
                                                                                                 storage: @js(data_get($d->specs, 'storage', '')),
@@ -511,6 +512,36 @@
                             pattern="[A-Za-z0-9\-]*" title="Letters, numbers, and hyphens only"
                             placeholder="Enter serial number">
                     </div>
+
+                                        <div x-show="isComputerType(addTypeId)" x-cloak>
+                        <label class="text-sm font-medium">Computer Name</label>
+
+                        <input list="computer_name_options" name="computer_name"
+                            x-model="addComputerName"
+                            value="{{ old('computer_name', old('specs.computer_name')) }}"
+                            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                            maxlength="100"
+                            placeholder="Select or type computer name"
+                            :disabled="!isComputerType(addTypeId)">
+
+                        <input type="hidden" name="specs[computer_name]"
+                            x-model="addComputerName"
+                            :disabled="!isComputerType(addTypeId)">
+                    </div>
+
+                    <datalist id="computer_name_options">
+                        @foreach($computerNames ?? [] as $computerName)
+                            @php
+                                $computerNameValue = is_object($computerName)
+                                    ? ($computerName->name ?? $computerName->computer_name ?? $computerName->title ?? '')
+                                    : $computerName;
+                            @endphp
+
+                            @if($computerNameValue)
+                                <option value="{{ $computerNameValue }}"></option>
+                            @endif
+                        @endforeach
+                    </datalist>
 
                     <div>
                         <label class="text-sm font-medium">Brand</label>
@@ -690,6 +721,21 @@
                                 </option>
                             @endforeach
                         </select>
+                    </div>
+
+                    <div x-show="isComputerType(editDevice.device_type_id)" x-cloak>
+                        <label class="text-sm font-medium">Computer Name</label>
+
+                        <input list="computer_name_options" name="computer_name"
+                            x-model="editDevice.computer_name"
+                            class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                            maxlength="100"
+                            placeholder="Select or type computer name"
+                            :disabled="!isComputerType(editDevice.device_type_id)">
+
+                        <input type="hidden" name="specs[computer_name]"
+                            x-model="editDevice.computer_name"
+                            :disabled="!isComputerType(editDevice.device_type_id)">
                     </div>
 
                     <div>

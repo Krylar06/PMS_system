@@ -2,6 +2,13 @@
 
 @section('title', 'Device Details')
 @section('page_title', 'Device Details')
+@section('breadcrumbs')
+    <a href="{{ route('admin.dashboard') }}" class="hover:text-blue-600">Dashboard</a>
+    <span>/</span>
+    <a href="{{ route('admin.devices.index') }}" class="hover:text-blue-600">Equipment Manager</a>
+    <span>/</span>
+    <span class="font-medium text-gray-800">Device Details</span>
+@endsection
 
 @section('content')
 @php
@@ -16,6 +23,7 @@
         selectedTypeId: @json(old('device_type_id', $device->device_type_id)),
 
         typeNames: @json($types->pluck('name', 'id')),
+
         getTypeName(typeId) {
             return (this.typeNames[typeId] || '').toLowerCase();
         },
@@ -23,41 +31,17 @@
         isComputerType(typeId = null) {
             let selected = typeId ?? this.selectedTypeId;
             let name = this.getTypeName(selected);
-
             return name === 'desktop' || name === 'laptop';
         },
 
         isDesktopType(typeId = null) {
             let selected = typeId ?? this.selectedTypeId;
             return this.getTypeName(selected) === 'desktop';
-        },
-
-        formatUnitPriceValue(value) {
-            value = String(value ?? '').replace(/[^0-9.]/g, '');
-
-            let parts = value.split('.');
-            let whole = parts.shift() || '';
-            let decimals = parts.length ? '.' + parts.join('').slice(0, 2) : '';
-
-            whole = whole.replace(/^0+(?=\d)/, '');
-            whole = whole.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-
-            return whole + decimals;
-        },
-
-        formatUnitPriceInput(event) {
-            event.target.value = this.formatUnitPriceValue(event.target.value);
-        },
-
-        cleanUnitPrices(form) {
-            form.querySelectorAll('.unit-price-input').forEach((input) => {
-                input.value = String(input.value ?? '').replace(/,/g, '');
-            });
         }
     }"
-    x-init="$nextTick(() => $el.querySelectorAll('.unit-price-input').forEach((input) => input.value = formatUnitPriceValue(input.value)))"
     class="grid grid-cols-1 gap-6 lg:grid-cols-3"
 >
+</div>
     <div class="lg:col-span-2">
         <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
             <div class="flex items-start justify-between gap-4">
@@ -87,9 +71,7 @@
                     </a>
 
                     <a
-                        href="{{ route('admin.devices.checklist.create', $device) }}"
-                        target="_blank"
-                        rel="noopener"
+                        href="{{ route('admin.devices.checklist.form', $device) }}"
                         class="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
                     >
                         Mark as Checked

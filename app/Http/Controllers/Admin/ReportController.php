@@ -9,6 +9,7 @@ use App\Models\DeviceMaintenanceRecord;
 use App\Models\DeviceType;
 use App\Models\Office;
 use App\Models\User;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 
 class ReportController extends Controller
@@ -72,45 +73,21 @@ class ReportController extends Controller
 
     public function checkedEquipment(Request $request)
     {
-        $adminId = $request->integer('admin_id') ?: null;
+        $checkerId = $request->integer('checker_id') ?: $request->integer('admin_id') ?: null;
         $typeId = $request->integer('type_id') ?: null;
         $dateFrom = $request->query('date_from');
         $dateTo = $request->query('date_to');
         $q = $request->string('q')->toString();
 
-        $records = DeviceMaintenanceRecord::query()
-            ->with([
-                'device.type',
-                'device.currentAssignment.staff.office.college',
-                'checkedBy',
-            ])
-            ->whereHas('checkedBy', fn ($query) => $query->where('role', 'admin'))
-            ->when($adminId, fn ($query) => $query->where('checked_by', $adminId))
-            ->when($typeId, function ($query) use ($typeId) {
-                $query->whereHas('device', fn ($deviceQuery) => $deviceQuery->where('device_type_id', $typeId));
-            })
-            ->when($dateFrom, fn ($query) => $query->whereDate('maintenance_date', '>=', $dateFrom))
-            ->when($dateTo, fn ($query) => $query->whereDate('maintenance_date', '<=', $dateTo))
-            ->when($q, function ($query) use ($q) {
-                $query->where(function ($sub) use ($q) {
-                    $sub->where('remarks', 'like', "%{$q}%")
-                        ->orWhere('maintenance_type', 'like', "%{$q}%")
-                        ->orWhereHas('device', function ($deviceQuery) use ($q) {
-                            $deviceQuery->where('property_number', 'like', "%{$q}%")
-                                ->orWhere('serial_number', 'like', "%{$q}%")
-                                ->orWhere('brand', 'like', "%{$q}%")
-                                ->orWhere('model', 'like', "%{$q}%");
-                        });
-                });
-            })
+        $records = $this->checkedEquipmentQuery($request)
             ->orderByDesc('maintenance_date')
             ->orderByDesc('id')
             ->paginate(25)
             ->withQueryString();
 
-        $adminSummary = DeviceMaintenanceRecord::query()
+        $checkerSummary = DeviceMaintenanceRecord::query()
             ->selectRaw('checked_by, COUNT(*) as total')
-            ->whereHas('checkedBy', fn ($query) => $query->where('role', 'admin'))
+            ->whereNotNull('checked_by')
             ->with('checkedBy')
             ->groupBy('checked_by')
             ->orderByDesc('total')
@@ -118,15 +95,41 @@ class ReportController extends Controller
 
         return view('admin.reports.checked-equipment', [
             'records' => $records,
-            'adminSummary' => $adminSummary,
-            'adminUsers' => User::where('role', 'admin')->orderBy('name')->get(),
+            'adminSummary' => $checkerSummary,
+            'checkerSummary' => $checkerSummary,
+            'adminUsers' => User::orderBy('name')->get(),
+            'checkerUsers' => User::orderBy('name')->get(),
             'types' => DeviceType::orderBy('name')->get(),
-            'adminId' => $adminId,
+            'adminId' => $checkerId,
+            'checkerId' => $checkerId,
             'typeId' => $typeId,
             'dateFrom' => $dateFrom,
             'dateTo' => $dateTo,
             'q' => $q,
         ]);
+    }
+
+    public function checkedEquipmentPdf(DeviceMaintenanceRecord $record)
+    {
+        $record->load([
+            'device.type',
+            'device.currentAssignment.staff.office.college',
+            'checkedBy',
+        ]);
+
+        abort_if(! $record->device, 404);
+
+        $pdf = Pdf::loadView('admin.reports.checked-equipment-pdf', [
+            'record' => $record,
+            'device' => $record->device,
+            'checklistItems' => $this->checklistItems(),
+            'softwareItems' => $this->softwareItems(),
+        ])->setPaper('legal', 'landscape');
+
+        $propertyNumber = preg_replace('/[^A-Za-z0-9_-]+/', '-', $record->device->property_number ?? 'device');
+        $date = $record->maintenance_date?->format('Y-m-d') ?? now()->format('Y-m-d');
+
+        return $pdf->stream("maintenance-checklist-{$propertyNumber}-{$date}.pdf");
     }
 
     public function checklist(Request $request)
@@ -143,6 +146,41 @@ class ReportController extends Controller
             'q' => $request->string('q')->toString(),
             'generatedAt' => now(),
         ], $this->filterOptions()));
+    }
+
+    private function checkedEquipmentQuery(Request $request)
+    {
+        $checkerId = $request->integer('checker_id') ?: $request->integer('admin_id') ?: null;
+        $typeId = $request->integer('type_id') ?: null;
+        $dateFrom = $request->query('date_from');
+        $dateTo = $request->query('date_to');
+        $q = $request->string('q')->toString();
+
+        return DeviceMaintenanceRecord::query()
+            ->with([
+                'device.type',
+                'device.currentAssignment.staff.office.college',
+                'checkedBy',
+            ])
+            ->whereNotNull('checked_by')
+            ->when($checkerId, fn ($query) => $query->where('checked_by', $checkerId))
+            ->when($typeId, function ($query) use ($typeId) {
+                $query->whereHas('device', fn ($deviceQuery) => $deviceQuery->where('device_type_id', $typeId));
+            })
+            ->when($dateFrom, fn ($query) => $query->whereDate('maintenance_date', '>=', $dateFrom))
+            ->when($dateTo, fn ($query) => $query->whereDate('maintenance_date', '<=', $dateTo))
+            ->when($q, function ($query) use ($q) {
+                $query->where(function ($sub) use ($q) {
+                    $sub->where('remarks', 'like', "%{$q}%")
+                        ->orWhere('maintenance_type', 'like', "%{$q}%")
+                        ->orWhereHas('device', function ($deviceQuery) use ($q) {
+                            $deviceQuery->where('property_number', 'like', "%{$q}%")
+                                ->orWhere('serial_number', 'like', "%{$q}%")
+                                ->orWhere('brand', 'like', "%{$q}%")
+                                ->orWhere('model', 'like', "%{$q}%");
+                        });
+                });
+            });
     }
 
     private function filteredAssetsQuery(Request $request)
@@ -187,6 +225,44 @@ class ReportController extends Controller
             'types' => DeviceType::orderBy('name')->get(),
             'colleges' => College::orderBy('name')->get(),
             'offices' => Office::with('college')->orderBy('name')->get(),
+        ];
+    }
+
+    private function checklistItems(): array
+    {
+        return [
+            'system_unit_power_on' => [
+                'group' => 'System Unit',
+                'label' => 'Check for power on',
+            ],
+            'monitor_display' => [
+                'group' => 'Monitor',
+                'label' => 'Check display',
+            ],
+            'keyboard_keys' => [
+                'group' => 'Keyboard',
+                'label' => 'Check for keys',
+            ],
+            'mouse_buttons' => [
+                'group' => 'Mouse',
+                'label' => 'Check mouse left/right buttons',
+            ],
+            'avr_ups_power_recovery' => [
+                'group' => 'AVR/UPS',
+                'label' => 'Check for power recovery',
+            ],
+            'printer_printout' => [
+                'group' => 'Printer',
+                'label' => 'Check printout',
+            ],
+        ];
+    }
+
+    private function softwareItems(): array
+    {
+        return [
+            'setup_antivirus' => 'Setup Anti-Virus',
+            'system_scan_removal' => 'System Scan and Removal of Malicious Software',
         ];
     }
 }

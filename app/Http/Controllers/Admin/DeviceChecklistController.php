@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use App\Models\Device;
 use App\Models\DeviceMaintenanceRecord;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -27,141 +26,110 @@ class DeviceChecklistController extends Controller
         ]);
     }
 
-    public function generate(Request $request, Device $device)
+    public function form(Device $device)
     {
-        $statusValues = ['OK', 'Not OK'];
-        $softwareValues = ['check', 'dash'];
+        return $this->create($device);
+    }
 
+    public function store(Request $request, Device $device)
+    {
         $data = $request->validate([
-            'maintenance_date' => ['required', 'date', 'before_or_equal:today'],
+            'date_checked' => ['nullable', 'date', 'before_or_equal:today'],
+            'maintenance_date' => ['nullable', 'date', 'before_or_equal:today'],
 
-            'system_unit' => ['nullable', Rule::in($statusValues)],
-            'monitor' => ['nullable', Rule::in($statusValues)],
-            'keyboard' => ['nullable', Rule::in($statusValues)],
-            'mouse' => ['nullable', Rule::in($statusValues)],
-            'avr_ups' => ['nullable', Rule::in($statusValues)],
-            'printer' => ['nullable', Rule::in($statusValues)],
+            'hardware' => ['nullable', 'array'],
+            'hardware.*' => ['nullable', 'string', 'in:OK,Not OK'],
 
-            'software_anti_virus' => ['nullable', Rule::in($softwareValues)],
-            'software_scan_remove' => ['nullable', Rule::in($softwareValues)],
+            'software' => ['nullable', 'array'],
+            'software.*' => ['nullable', 'string', 'in:check,dash'],
 
             'remarks' => ['nullable', 'string', 'max:1000'],
             'corrective_action' => ['nullable', 'string', 'max:1000'],
-        ], [
-            'maintenance_date.before_or_equal' => 'The checklist date cannot be in the future.',
         ]);
 
-        $device->load([
-            'type',
-            'currentAssignment.staff.office.college',
-        ]);
+        $dateChecked = $data['date_checked']
+            ?? $data['maintenance_date']
+            ?? now()->toDateString();
 
-        $checklistItems = $this->checklistItems();
-        $softwareItems = $this->softwareItems();
-        $checklistValues = [];
+        $hardwareResponses = $data['hardware'] ?? [];
+        $softwareResponses = $data['software'] ?? [];
+        $remarks = $data['remarks'] ?? 'Preventive maintenance checklist completed.';
+        $correctiveAction = $data['corrective_action'] ?? null;
 
-        foreach ($checklistItems as $key => $label) {
-            $checklistValues[$key] = $data[$key] ?? '';
-        }
-
-        $softwareValuesForPdf = [
-            'software_anti_virus' => $data['software_anti_virus'] ?? '',
-            'software_scan_remove' => $data['software_scan_remove'] ?? '',
-        ];
-
-        $remarks = trim((string) ($data['remarks'] ?? ''));
-        $correctiveAction = trim((string) ($data['corrective_action'] ?? ''));
-
-        $recordRemarks = $this->buildMaintenanceRemarks(
-            $checklistItems,
-            $checklistValues,
-            $softwareItems,
-            $softwareValuesForPdf,
-            $remarks,
-            $correctiveAction
-        );
-
-        DeviceMaintenanceRecord::create([
+        $record = DeviceMaintenanceRecord::create([
             'device_id' => $device->id,
-            'maintenance_date' => $data['maintenance_date'],
-            'maintenance_type' => 'Preventive Maintenance Checklist',
-            'remarks' => $recordRemarks,
+            'maintenance_date' => $dateChecked,
+            'maintenance_type' => 'Checked',
+            'remarks' => $remarks,
+            'corrective_action' => $correctiveAction,
+            'checklist_data' => [
+                'hardware' => $hardwareResponses,
+                'software' => $softwareResponses,
+            ],
             'checked_by' => Auth::id(),
         ]);
 
         $device->update([
-            'last_maintenance_date' => $data['maintenance_date'],
-            'maintenance_remarks' => $remarks ?: 'Preventive maintenance checklist completed.',
+            'last_maintenance_date' => $dateChecked,
+            'maintenance_remarks' => $remarks,
         ]);
 
-        ActivityLog::record('updated', "Generated preventive maintenance checklist for device \"{$device->property_number}\"", $device);
+        ActivityLog::record(
+            'updated',
+            "Marked device \"{$device->property_number}\" as checked with checklist",
+            $device
+        );
 
-        $pdf = Pdf::loadView('admin.devices.checklist-pdf', [
-            'device' => $device,
-            'checklistItems' => $checklistItems,
-            'checklistValues' => $checklistValues,
-            'softwareItems' => $softwareItems,
-            'softwareValues' => $softwareValuesForPdf,
-            'maintenanceDate' => $data['maintenance_date'],
-            'remarks' => $remarks,
-            'correctiveAction' => $correctiveAction,
-            'checkedBy' => Auth::user(),
-        ])->setPaper('a4', 'landscape');
+        return redirect()
+            ->route('admin.devices.show', $device)
+            ->with('success', 'Device has been marked as checked. Checklist saved.');
+    }
 
-        $safePropertyNumber = str($device->property_number ?? 'device')
-            ->replace(['/', '\\', ' '], '-')
-            ->toString();
+    public function generate(Request $request, Device $device)
+    {
+        return $this->store($request, $device);
+    }
 
-        return $pdf->stream('preventive-maintenance-checklist-' . $safePropertyNumber . '-' . $data['maintenance_date'] . '.pdf');
+    public function generatePdf(Request $request, Device $device)
+    {
+        return $this->store($request, $device);
     }
 
     private function checklistItems(): array
     {
         return [
-            'system_unit' => 'System Unit - Check for power on',
-            'monitor' => 'Monitor - Check display',
-            'keyboard' => 'Keyboard - Check keys',
-            'mouse' => 'Mouse - Check mouse left/right buttons',
-            'avr_ups' => 'AVR/UPS - Check for power recovery',
-            'printer' => 'Printer - Check printout',
+            'system_unit_power_on' => [
+                'group' => 'System Unit',
+                'label' => 'Check for power on',
+            ],
+            'monitor_display' => [
+                'group' => 'Monitor',
+                'label' => 'Check display',
+            ],
+            'keyboard_keys' => [
+                'group' => 'Keyboard',
+                'label' => 'Check for keys',
+            ],
+            'mouse_buttons' => [
+                'group' => 'Mouse',
+                'label' => 'Check mouse left/right buttons',
+            ],
+            'avr_ups_power_recovery' => [
+                'group' => 'AVR/UPS',
+                'label' => 'Check for power recovery',
+            ],
+            'printer_printout' => [
+                'group' => 'Printer',
+                'label' => 'Check printout',
+            ],
         ];
     }
 
     private function softwareItems(): array
     {
         return [
-            'software_anti_virus' => 'Setup Anti-Virus',
-            'software_scan_remove' => 'System Scan and Removal of Malicious Software',
+            'setup_antivirus' => 'Setup Anti-Virus',
+            'system_scan_removal' => 'System Scan and Removal of Malicious Software',
         ];
-    }
-
-    private function buildMaintenanceRemarks(
-        array $checklistItems,
-        array $checklistValues,
-        array $softwareItems,
-        array $softwareValues,
-        string $remarks,
-        string $correctiveAction
-    ): string {
-        $lines = ['Preventive maintenance checklist generated.'];
-
-        foreach ($checklistItems as $key => $label) {
-            $lines[] = $label . ': ' . ($checklistValues[$key] ?: '-');
-        }
-
-        foreach ($softwareItems as $key => $label) {
-            $value = ($softwareValues[$key] ?? '') === 'check' ? '✓' : '-';
-            $lines[] = $label . ': ' . $value;
-        }
-
-        if ($remarks !== '') {
-            $lines[] = 'Remarks: ' . $remarks;
-        }
-
-        if ($correctiveAction !== '') {
-            $lines[] = 'Corrective Action: ' . $correctiveAction;
-        }
-
-        return implode("\n", $lines);
     }
 }

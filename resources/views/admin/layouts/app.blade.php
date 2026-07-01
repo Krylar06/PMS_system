@@ -193,6 +193,11 @@
 
                     <h1 class="truncate text-lg sm:text-xl font-semibold text-gray-900">
                         @yield('page_title', 'Admin')
+                        @if(trim($__env->yieldContent('breadcrumbs')))
+                            <nav class="mt-1 flex flex-wrap items-center gap-2 text-sm text-gray-500">
+                              @yield('breadcrumbs')
+                            </nav>
+                    @endif
                     </h1>
                 </div>
 

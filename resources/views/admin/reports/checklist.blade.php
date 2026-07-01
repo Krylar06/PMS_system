@@ -2,6 +2,13 @@
 
 @section('title', 'Checklist Form')
 @section('page_title', 'Checklist Form')
+@section('breadcrumbs')
+    <a href="{{ route('admin.dashboard') }}" class="hover:text-blue-600">Dashboard</a>
+    <span>/</span>
+    <a href="{{ route('admin.reports.index') }}" class="hover:text-blue-600">Reports</a>
+    <span>/</span>
+    <span class="font-medium text-gray-800">Registered Accounts</span>
+@endsection
 
 @section('content')
 <style>

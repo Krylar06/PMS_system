@@ -2,10 +2,17 @@
 
 @section('title', 'Registered Accounts Report')
 @section('page_title', 'Registered Accounts Report')
+@section('breadcrumbs')
+    <a href="{{ route('admin.dashboard') }}" class="hover:text-blue-600">Dashboard</a>
+    <span>/</span>
+    <a href="{{ route('admin.reports.index') }}" class="hover:text-blue-600">Reports</a>
+    <span>/</span>
+    <span class="font-medium text-gray-800">Registered Accounts</span>
+@endsection
 
 @section('content')
 <div class="space-y-5">
-    <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+    <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between no-print">
         <div>
             <h1 class="text-2xl font-semibold text-gray-900">Registered Accounts Report</h1>
             <p class="mt-1 text-sm text-gray-500">List of admin and custodian accounts.</p>
@@ -13,7 +20,7 @@
         <a href="{{ route('admin.reports.index') }}" class="inline-flex items-center rounded-xl bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200">Back to Reports</a>
     </div>
 
-    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-2 no-print">
         <div class="rounded-2xl border-l-4 border-blue-500 bg-white p-5 shadow-sm">
             <div class="text-xs font-semibold uppercase tracking-widest text-blue-500">Admin Accounts</div>
             <div class="mt-2 text-3xl font-bold text-gray-900">{{ number_format($adminCount) }}</div>
@@ -24,7 +31,7 @@
         </div>
     </div>
 
-    <div class="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+    <div class="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm no-print">
         <form method="GET" class="grid grid-cols-1 gap-3 md:grid-cols-3">
             <input name="q" value="{{ $q }}" placeholder="Search name, email, role..." class="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100">
 
@@ -41,13 +48,13 @@
         </form>
     </div>
 
-    <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+    <div id="print-area" class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
         <div class="flex items-center justify-between border-b border-gray-200 px-5 py-4">
             <div>
-                <h2 class="font-semibold text-gray-900">Accounts</h2>
+                <h2 class="font-semibold text-gray-900">Registered Accounts Report</h2>
                 <p class="mt-1 text-sm text-gray-500">{{ number_format($users->total()) }} result(s)</p>
             </div>
-            <button onclick="window.print()" class="rounded-xl bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-black">Print</button>
+            <button type="button" onclick="window.print()" class="no-print rounded-xl bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-black">Print</button>
         </div>
 
         <div class="overflow-x-auto">
@@ -79,9 +86,56 @@
             </table>
         </div>
 
-        <div class="border-t border-gray-200 px-5 py-4">
+        <div class="border-t border-gray-200 px-5 py-4 no-print">
             {{ $users->links() }}
         </div>
     </div>
 </div>
+
+<style>
+    @media print {
+        body * {
+            visibility: hidden !important;
+        }
+
+        #print-area,
+        #print-area * {
+            visibility: visible !important;
+        }
+
+        #print-area {
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 100% !important;
+            border: none !important;
+            box-shadow: none !important;
+            background: #ffffff !important;
+        }
+
+        #print-area table {
+            width: 100% !important;
+            border-collapse: collapse !important;
+        }
+
+        #print-area th,
+        #print-area td {
+            border: 1px solid #111827 !important;
+            padding: 8px !important;
+        }
+
+        #print-area thead {
+            background: #f3f4f6 !important;
+        }
+
+        .no-print {
+            display: none !important;
+        }
+
+        @page {
+            size: A4 portrait;
+            margin: 12mm;
+        }
+    }
+</style>
 @endsection
