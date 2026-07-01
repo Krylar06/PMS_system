@@ -34,7 +34,7 @@ class ReportController extends Controller
             'selectedCollegeId' => $request->integer('college_id'),
             'selectedOfficeId' => $request->integer('office_id'),
             'q' => $request->string('q')->toString(),
-        ], $this->filterOptions()));
+        ], $this->filterOptions($request->integer('college_id') ?: null)));
     }
 
     public function accounts(Request $request)
@@ -145,7 +145,7 @@ class ReportController extends Controller
             'selectedOfficeId' => $request->integer('office_id'),
             'q' => $request->string('q')->toString(),
             'generatedAt' => now(),
-        ], $this->filterOptions()));
+        ], $this->filterOptions($request->integer('college_id') ?: null)));
     }
 
     private function checkedEquipmentQuery(Request $request)
@@ -219,12 +219,15 @@ class ReportController extends Controller
             });
     }
 
-    private function filterOptions(): array
+    private function filterOptions(?int $collegeId = null): array
     {
         return [
             'types' => DeviceType::orderBy('name')->get(),
             'colleges' => College::orderBy('name')->get(),
-            'offices' => Office::with('college')->orderBy('name')->get(),
+            'offices' => Office::with('college')
+                ->when($collegeId, fn ($query) => $query->where('college_id', $collegeId))
+                ->orderBy('name')
+                ->get(),
         ];
     }
 
