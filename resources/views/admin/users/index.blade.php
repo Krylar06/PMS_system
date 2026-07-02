@@ -75,15 +75,15 @@ document.addEventListener('alpine:init', () => {
 <div x-data="userManager" class="space-y-5">
     <div class="flex items-start justify-between gap-3">
         <div>
-            <h1 class="text-2xl font-semibold text-gray-900">User Accounts</h1>
-            <p class="mt-1 text-sm text-gray-500">
+            <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">User Accounts</h1>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                 Manage who can sign in and what they're allowed to do.
             </p>
         </div>
 
         <button
             type="button"
-            class="shrink-0 inline-flex items-center rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700"
+            class="shrink-0 inline-flex items-center rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
             @click="openAdd()"
         >
             + Add User
@@ -93,14 +93,14 @@ document.addEventListener('alpine:init', () => {
     {{-- Mobile cards --}}
     <div class="grid grid-cols-1 gap-3 md:hidden">
         @forelse($users as $u)
-            <div class="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+            <div class="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
                 <div class="flex items-start justify-between gap-3">
                     <div>
-                        <div class="font-semibold text-gray-900">{{ $u->name }}</div>
-                        <div class="mt-1 text-sm text-gray-500 break-all">{{ $u->email }}</div>
+                        <div class="font-semibold text-gray-900 dark:text-white">{{ $u->name }}</div>
+                        <div class="mt-1 text-sm text-gray-500 break-all dark:text-gray-400">{{ $u->email }}</div>
                     </div>
 
-                    <span class="inline-flex shrink-0 rounded-full {{ $u->isAdmin() ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700' }} px-2.5 py-1 text-xs font-medium">
+                    <span class="inline-flex shrink-0 rounded-full {{ $u->isAdmin() ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400' : 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400' }} px-2.5 py-1 text-xs font-medium">
                         {{ $u->roleLabel() }}
                     </span>
                 </div>
@@ -108,7 +108,7 @@ document.addEventListener('alpine:init', () => {
                 <div class="mt-4 flex flex-wrap gap-2">
                     <button
                         type="button"
-                        class="rounded-lg bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-black"
+                        class="rounded-lg bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-black dark:bg-gray-700 dark:hover:bg-gray-600"
                         @click="openEdit({
                             id: {{ $u->id }},
                             name: @js($u->name),
@@ -122,7 +122,7 @@ document.addEventListener('alpine:init', () => {
                     @if($u->id !== auth()->id())
                         <button
                             type="button"
-                            class="rounded-lg bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700"
+                            class="rounded-lg bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600"
                             @click="openDelete({{ $u->id }})"
                         >
                             Delete
@@ -131,31 +131,31 @@ document.addEventListener('alpine:init', () => {
                 </div>
             </div>
         @empty
-            <div class="rounded-2xl border border-gray-200 bg-white p-6 text-center text-gray-500 shadow-sm">
+            <div class="rounded-2xl border border-gray-200 bg-white p-6 text-center text-gray-500 shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">
                 No users found.
             </div>
         @endforelse
     </div>
 
     {{-- Desktop table --}}
-    <div class="hidden md:block overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+    <div class="hidden md:block overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
         <div class="overflow-x-auto">
             <table class="min-w-full text-sm">
-                <thead class="bg-gray-50 text-left">
+                <thead class="bg-gray-50 text-left dark:bg-gray-900/40">
                     <tr>
-                        <th class="px-4 py-3 font-semibold text-gray-700">Name</th>
-                        <th class="px-4 py-3 font-semibold text-gray-700">Email</th>
-                        <th class="px-4 py-3 font-semibold text-gray-700">Role</th>
-                        <th class="px-4 py-3 font-semibold text-gray-700">Actions</th>
+                        <th class="px-4 py-3 font-semibold text-gray-700 dark:text-gray-300">Name</th>
+                        <th class="px-4 py-3 font-semibold text-gray-700 dark:text-gray-300">Email</th>
+                        <th class="px-4 py-3 font-semibold text-gray-700 dark:text-gray-300">Role</th>
+                        <th class="px-4 py-3 font-semibold text-gray-700 dark:text-gray-300">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-200">
+                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                     @forelse($users as $u)
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-3 font-medium text-gray-900">{{ $u->name }}</td>
-                            <td class="px-4 py-3 text-gray-700">{{ $u->email }}</td>
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/40">
+                            <td class="px-4 py-3 font-medium text-gray-900 dark:text-white">{{ $u->name }}</td>
+                            <td class="px-4 py-3 text-gray-700 dark:text-gray-300">{{ $u->email }}</td>
                             <td class="px-4 py-3">
-                                <span class="inline-flex rounded-full {{ $u->isAdmin() ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700' }} px-2.5 py-1 text-xs font-medium">
+                                <span class="inline-flex rounded-full {{ $u->isAdmin() ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400' : 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400' }} px-2.5 py-1 text-xs font-medium">
                                     {{ $u->roleLabel() }}
                                 </span>
                             </td>
@@ -163,7 +163,7 @@ document.addEventListener('alpine:init', () => {
                                 <div class="flex items-center gap-2">
                                     <button
                                         type="button"
-                                        class="rounded-lg bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-black"
+                                        class="rounded-lg bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-black dark:bg-gray-700 dark:hover:bg-gray-600"
                                         @click="openEdit({
                                             id: {{ $u->id }},
                                             name: @js($u->name),
@@ -177,20 +177,20 @@ document.addEventListener('alpine:init', () => {
                                     @if($u->id !== auth()->id())
                                         <button
                                             type="button"
-                                            class="rounded-lg bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700"
+                                            class="rounded-lg bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600"
                                             @click="openDelete({{ $u->id }})"
                                         >
                                             Delete
                                         </button>
                                     @else
-                                        <span class="text-xs text-gray-400">(you)</span>
+                                        <span class="text-xs text-gray-400 dark:text-gray-500">(you)</span>
                                     @endif
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="px-6 py-8 text-center text-gray-500">
+                            <td colspan="4" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
                                 No users found.
                             </td>
                         </tr>
@@ -210,79 +210,79 @@ document.addEventListener('alpine:init', () => {
             @csrf
 
             <div>
-                <label class="text-sm font-medium">Full Name</label>
+                <label class="text-sm font-medium dark:text-gray-300">Full Name</label>
                 <input
                     name="name"
                     x-model="addSingle.name"
-                    class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                    class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                     required
                     maxlength="100"
                     pattern="[A-Za-zÑñ][A-Za-zÑñ.\-'\s]*"
                     title="Letters only"
                     placeholder="e.g. Juan Dela Cruz"
                 >
-                <div class="mt-1 text-sm text-red-600" x-show="addSingle.nameError" x-text="addSingle.nameError"></div>
+                <div class="mt-1 text-sm text-red-600 dark:text-red-400" x-show="addSingle.nameError" x-text="addSingle.nameError"></div>
             </div>
 
             <div>
-                <label class="text-sm font-medium">Email</label>
+                <label class="text-sm font-medium dark:text-gray-300">Email</label>
                 <input
                     name="email"
                     type="email"
                     x-model="addSingle.email"
-                    class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                    class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                     required
                     maxlength="255"
                     pattern="[^\s@]+@[^\s@]+\.[^\s@]+"
                     title="Enter a complete email address"
                     placeholder="e.g. juan.delacruz@example.com"
                 >
-                <div class="mt-1 text-sm text-red-600" x-show="addSingle.emailError" x-text="addSingle.emailError"></div>
+                <div class="mt-1 text-sm text-red-600 dark:text-red-400" x-show="addSingle.emailError" x-text="addSingle.emailError"></div>
             </div>
 
             <div>
-                <label class="text-sm font-medium">Role</label>
+                <label class="text-sm font-medium dark:text-gray-300">Role</label>
                 <select
                     name="role"
                     x-model="addSingle.role"
-                    class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                    class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                     required
                 >
                     @foreach($roles as $value => $label)
                         <option value="{{ $value }}">{{ $label }}</option>
                     @endforeach
                 </select>
-                <div class="mt-1 text-sm text-red-600" x-show="addSingle.roleError" x-text="addSingle.roleError"></div>
+                <div class="mt-1 text-sm text-red-600 dark:text-red-400" x-show="addSingle.roleError" x-text="addSingle.roleError"></div>
             </div>
 
             <div>
-                <label class="text-sm font-medium">Password</label>
+                <label class="text-sm font-medium dark:text-gray-300">Password</label>
                 <input
                     name="password"
                     type="password"
                     x-model="addSingle.password"
-                    class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                    class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                     required
                     minlength="8"
                 >
-                <div class="mt-1 text-sm text-red-600" x-show="addSingle.passwordError" x-text="addSingle.passwordError"></div>
+                <div class="mt-1 text-sm text-red-600 dark:text-red-400" x-show="addSingle.passwordError" x-text="addSingle.passwordError"></div>
             </div>
 
             <div>
-                <label class="text-sm font-medium">Confirm Password</label>
+                <label class="text-sm font-medium dark:text-gray-300">Confirm Password</label>
                 <input
                     name="password_confirmation"
                     type="password"
                     x-model="addSingle.password_confirmation"
-                    class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                    class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                     required
                     minlength="8"
                 >
             </div>
 
             <div class="flex gap-2 pt-2">
-                <button class="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">Save</button>
-                <button type="button" class="rounded-lg bg-gray-100 px-4 py-2 text-gray-700 hover:bg-gray-200" @click="addOpen=false">Cancel</button>
+                <button class="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600">Save</button>
+                <button type="button" class="rounded-lg bg-gray-100 px-4 py-2 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600" @click="addOpen=false">Cancel</button>
             </div>
         </form>
     </x-modal>
@@ -300,76 +300,76 @@ document.addEventListener('alpine:init', () => {
             <input type="hidden" name="editing_id" :value="editUser.id">
 
             <div>
-                <label class="text-sm font-medium">Full Name</label>
+                <label class="text-sm font-medium dark:text-gray-300">Full Name</label>
                 <input
                     name="name"
                     x-model="editUser.name"
-                    class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                    class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                     required
                     maxlength="100"
                     pattern="[A-Za-zÑñ][A-Za-zÑñ.\-'\s]*"
                     title="Letters only"
                 >
-                <div class="mt-1 text-sm text-red-600" x-show="editUser.nameError" x-text="editUser.nameError"></div>
+                <div class="mt-1 text-sm text-red-600 dark:text-red-400" x-show="editUser.nameError" x-text="editUser.nameError"></div>
             </div>
 
             <div>
-                <label class="text-sm font-medium">Email</label>
+                <label class="text-sm font-medium dark:text-gray-300">Email</label>
                 <input
                     name="email"
                     type="email"
                     x-model="editUser.email"
-                    class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                    class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                     required
                     maxlength="255"
                     pattern="[^\s@]+@[^\s@]+\.[^\s@]+"
                     title="Enter a complete email address"
                 >
-                <div class="mt-1 text-sm text-red-600" x-show="editUser.emailError" x-text="editUser.emailError"></div>
+                <div class="mt-1 text-sm text-red-600 dark:text-red-400" x-show="editUser.emailError" x-text="editUser.emailError"></div>
             </div>
 
             <div>
-                <label class="text-sm font-medium">Role</label>
+                <label class="text-sm font-medium dark:text-gray-300">Role</label>
                 <select
                     name="role"
                     x-model="editUser.role"
-                    class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                    class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                     required
                 >
                     @foreach($roles as $value => $label)
                         <option value="{{ $value }}">{{ $label }}</option>
                     @endforeach
                 </select>
-                <div class="mt-1 text-sm text-red-600" x-show="editUser.roleError" x-text="editUser.roleError"></div>
+                <div class="mt-1 text-sm text-red-600 dark:text-red-400" x-show="editUser.roleError" x-text="editUser.roleError"></div>
             </div>
 
             <div>
-                <label class="text-sm font-medium">New Password</label>
+                <label class="text-sm font-medium dark:text-gray-300">New Password</label>
                 <input
                     name="password"
                     type="password"
                     x-model="editUser.password"
-                    class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                    class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                     minlength="8"
                     placeholder="Leave blank to keep current password"
                 >
-                <div class="mt-1 text-sm text-red-600" x-show="editUser.passwordError" x-text="editUser.passwordError"></div>
+                <div class="mt-1 text-sm text-red-600 dark:text-red-400" x-show="editUser.passwordError" x-text="editUser.passwordError"></div>
             </div>
 
             <div>
-                <label class="text-sm font-medium">Confirm New Password</label>
+                <label class="text-sm font-medium dark:text-gray-300">Confirm New Password</label>
                 <input
                     name="password_confirmation"
                     type="password"
                     x-model="editUser.password_confirmation"
-                    class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                    class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                     minlength="8"
                 >
             </div>
 
             <div class="flex gap-2 pt-2">
-                <button class="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">Update</button>
-                <button type="button" class="rounded-lg bg-gray-100 px-4 py-2 text-gray-700 hover:bg-gray-200" @click="editOpen=false">Cancel</button>
+                <button class="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600">Update</button>
+                <button type="button" class="rounded-lg bg-gray-100 px-4 py-2 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600" @click="editOpen=false">Cancel</button>
             </div>
         </form>
     </x-modal>
@@ -377,7 +377,7 @@ document.addEventListener('alpine:init', () => {
     {{-- Delete modal --}}
     <x-modal show="deleteOpen" title="Delete User">
         <div class="space-y-3">
-            <div class="text-sm text-gray-700">
+            <div class="text-sm text-gray-700 dark:text-gray-300">
                 Are you sure you want to delete this user account?
             </div>
 
@@ -390,8 +390,8 @@ document.addEventListener('alpine:init', () => {
                 @csrf
                 @method('DELETE')
 
-                <button type="submit" x-ref="confirmDeleteBtn" class="rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700">Confirm</button>
-                <button type="button" class="rounded-lg bg-gray-100 px-4 py-2 text-gray-700 hover:bg-gray-200" @click="deleteOpen=false">Cancel</button>
+                <button type="submit" x-ref="confirmDeleteBtn" class="rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600">Confirm</button>
+                <button type="button" class="rounded-lg bg-gray-100 px-4 py-2 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600" @click="deleteOpen=false">Cancel</button>
             </form>
         </div>
     </x-modal>
