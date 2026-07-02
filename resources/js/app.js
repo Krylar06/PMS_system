@@ -1,4 +1,5 @@
 import './bootstrap';
+import './theme';
 
 // NOTE: Do NOT manually import/start Alpine.js here.
 // Livewire (v3/v4) already bundles and auto-starts its own Alpine instance
