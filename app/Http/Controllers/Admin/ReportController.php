@@ -124,12 +124,45 @@ class ReportController extends Controller
             'device' => $record->device,
             'checklistItems' => $this->checklistItems(),
             'softwareItems' => $this->softwareItems(),
-        ])->setPaper('legal', 'landscape');
+        ])->setPaper([0, 0, 612, 936], 'landscape');
 
         $propertyNumber = preg_replace('/[^A-Za-z0-9_-]+/', '-', $record->device->property_number ?? 'device');
         $date = $record->maintenance_date?->format('Y-m-d') ?? now()->format('Y-m-d');
 
         return $pdf->stream("maintenance-checklist-{$propertyNumber}-{$date}.pdf");
+    }
+
+    public function checkedEquipmentSelectedPdf(Request $request)
+    {
+        $data = $request->validate([
+            'record_ids' => ['required', 'array', 'min:1'],
+            'record_ids.*' => ['integer', 'exists:device_maintenance_records,id'],
+        ], [
+            'record_ids.required' => 'Please select at least one checked equipment record to print.',
+            'record_ids.min' => 'Please select at least one checked equipment record to print.',
+        ]);
+
+        $records = DeviceMaintenanceRecord::query()
+            ->with([
+                'device.type',
+                'device.currentAssignment.staff.office.college',
+                'checkedBy',
+            ])
+            ->whereNotNull('checked_by')
+            ->whereIn('id', $data['record_ids'])
+            ->orderBy('maintenance_date')
+            ->orderBy('id')
+            ->get();
+
+        abort_if($records->isEmpty(), 404);
+
+        $pdf = Pdf::loadView('admin.reports.checked-equipment-pdf', [
+            'records' => $records,
+            'checklistItems' => $this->checklistItems(),
+            'softwareItems' => $this->softwareItems(),
+        ])->setPaper([0, 0, 612, 936], 'landscape');
+
+        return $pdf->stream('maintenance-checklists-selected-' . now()->format('Y-m-d-His') . '.pdf');
     }
 
     public function checklist(Request $request)
